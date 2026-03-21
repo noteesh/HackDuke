@@ -1,0 +1,63 @@
+# --- Operating System Files ---
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.lock
+.LSOverride
+
+# --- Common IDEs & Editors ---
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.iml
+*.iws
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+
+# --- Environment & Secrets (CRITICAL) ---
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+auth.json
+secrets.json
+
+# --- Build & Dependency Artifacts ---
+node_modules/
+bower_components/
+build/
+dist/
+out/
+target/
+bin/
+obj/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# --- Python Clutter ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env/
+
+# --- Logs & Temp Files ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.cache/
+tmp/
+temp/
