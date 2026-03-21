@@ -39,86 +39,107 @@ function tryParseJSON(content) {
   }
 }
 
-// Convert each agent's structured JSON output into human-readable text for streaming
+// Convert each agent's structured JSON output into human-readable text for streaming.
+// Uses the agent's summary/prose fields first to avoid raw JSON fragments.
 function formatAgentText(agentKey, json, rawFallback) {
   if (!json) return rawFallback ?? '';
 
+  const lines = [];
+
   switch (agentKey) {
-    case 'bias':
-      return [
-        `DISCRIMINATION RISK LEVEL: ${json.overall_discrimination_risk ?? 'UNKNOWN'}`,
-        '',
-        ...(json.findings ?? []).map(f => [
-          `${(f.finding_type ?? 'FINDING').toUpperCase()}: ${f.signal ?? ''}`,
-          `Protected class: ${f.protected_class ?? 'N/A'} | Strength: ${f.strength ?? 'N/A'}`,
-          `Citation: ${f.citation ?? 'N/A'}`,
-        ].join('\n')),
-        '',
-        json.strongest_argument ? `STRONGEST ARGUMENT:\n${json.strongest_argument}` : '',
-      ].filter(Boolean).join('\n\n');
+    case 'bias': {
+      if (json.overall_discrimination_risk)
+        lines.push(`DISCRIMINATION RISK: ${json.overall_discrimination_risk}`);
+      if (json.risk_summary) lines.push('', json.risk_summary);
+      for (const f of (json.findings ?? [])) {
+        const text = typeof f === 'string' ? f
+          : [f.signal, f.protected_class ? `(${f.protected_class})` : null, f.citation ? `— ${f.citation}` : null]
+              .filter(Boolean).join(' ');
+        if (text.trim()) lines.push('', `• ${text}`);
+      }
+      if (json.strongest_argument) lines.push('', 'KEY ARGUMENT:', json.strongest_argument);
+      break;
+    }
 
-    case 'precedent':
-      return [
-        `PRECEDENT STRENGTH: ${json.overall_precedent_strength ?? 'UNKNOWN'}`,
-        '',
-        ...(json.cases ?? []).map(c => [
-          `${c.name ?? 'Case'} (${c.citation ?? ''})`,
-          `Applicability: ${c.applicability ?? 'N/A'} | Strength: ${c.strength ?? 'N/A'}`,
-        ].join('\n')),
-        '',
-        json.strongest_precedent ? `STRONGEST PRECEDENT:\n${json.strongest_precedent}` : '',
-      ].filter(Boolean).join('\n\n');
+    case 'precedent': {
+      // agents return either overall_precedent_strength or overall_precedence_strength
+      const strength = json.overall_precedent_strength ?? json.overall_precedence_strength;
+      if (strength) lines.push(`PRECEDENT STRENGTH: ${strength}`);
+      if (json.precedent_summary) lines.push('', json.precedent_summary);
+      for (const c of (json.cases ?? [])) {
+        const name = typeof c === 'string' ? c : `${c.name ?? 'Case'}${c.citation ? ` (${c.citation})` : ''}`;
+        lines.push('', `• ${name}`);
+      }
+      for (const e of (json.enforcement_actions ?? [])) {
+        const name = typeof e === 'string' ? e : (e.name ?? e.title ?? '');
+        if (name) lines.push(`• Enforcement: ${name}`);
+      }
+      if (json.strongest_precedent) lines.push('', 'STRONGEST PRECEDENT:', json.strongest_precedent);
+      break;
+    }
 
-    case 'circumstance':
-      return [
-        `CIRCUMSTANCE STRENGTH: ${json.overall_circumstance_strength ?? 'UNKNOWN'}`,
-        '',
-        ...(json.alternative_credit_evidence ?? []).map(e => [
-          `${(e.evidence_type ?? 'EVIDENCE').toUpperCase()}: ${e.argument ?? ''}`,
-          `Citation: ${e.citation ?? 'N/A'}`,
-        ].join('\n')),
-        ...(json.algorithm_blind_spots ?? []).map(b =>
-          `BLIND SPOT: ${typeof b === 'string' ? b : JSON.stringify(b)}`
-        ),
-        '',
-        json.strongest_argument ? `STRONGEST ARGUMENT:\n${json.strongest_argument}` : '',
-      ].filter(Boolean).join('\n\n');
+    case 'circumstance': {
+      if (json.overall_circumstance_strength)
+        lines.push(`CIRCUMSTANCE STRENGTH: ${json.overall_circumstance_strength}`);
+      if (json.circumstance_summary) lines.push('', json.circumstance_summary);
+      for (const e of (json.alternative_credit_evidence ?? [])) {
+        const text = typeof e === 'string' ? e : (e.argument ?? e.description ?? '');
+        if (text) lines.push('', `• ${text}`);
+      }
+      for (const b of (json.algorithm_blind_spots ?? [])) {
+        // never stringify objects — extract prose field
+        const text = typeof b === 'string' ? b
+          : (b.blind_spot ?? b.description ?? b.argument ?? b.factor ?? '');
+        if (text) lines.push(`• Blind spot: ${text}`);
+      }
+      if (json.strongest_argument) lines.push('', 'KEY ARGUMENT:', json.strongest_argument);
+      break;
+    }
 
-    case 'legal':
-      return [
-        `LEGAL RISK LEVEL: ${json.overall_legal_risk ?? 'UNKNOWN'}`,
-        '',
-        ...(json.violations ?? []).map(v => [
-          `${v.law ?? ''} — ${v.section ?? ''}`,
-          `VIOLATION: ${v.violation ?? ''}`,
-          `Severity: ${v.severity ?? 'N/A'} | Private right of action: ${v.private_right_of_action ? 'YES' : 'NO'}`,
-        ].join('\n')),
-        '',
-        json.strongest_violation ? `STRONGEST VIOLATION:\n${json.strongest_violation}` : '',
-      ].filter(Boolean).join('\n\n');
+    case 'legal': {
+      if (json.overall_legal_risk) lines.push(`LEGAL RISK: ${json.overall_legal_risk}`);
+      if (json.legal_summary) lines.push('', json.legal_summary);
+      for (const v of (json.violations ?? [])) {
+        const text = typeof v === 'string' ? v
+          : `${v.law ?? ''} ${v.section ?? ''}: ${v.violation ?? ''} — Severity: ${v.severity ?? 'N/A'}`;
+        lines.push('', `• ${text}`);
+      }
+      if (json.strongest_violation) lines.push('', 'KEY VIOLATION:', json.strongest_violation);
+      break;
+    }
 
-    case 'defender':
-      return [
-        json.primary_justification
-          ? `PRIMARY JUSTIFICATION:\n${json.primary_justification.argument ?? ''}\nCitation: ${json.primary_justification.citation ?? 'N/A'}`
-          : '',
-        `DEFENSE CONFIDENCE: ${json.overall_defense_confidence ?? 'UNKNOWN'}`,
-        json.weakest_point ? `WEAKEST POINT:\n${json.weakest_point}` : '',
-      ].filter(Boolean).join('\n\n');
+    case 'defender': {
+      if (json.overall_defense_confidence)
+        lines.push(`DEFENSE CONFIDENCE: ${json.overall_defense_confidence}`);
+      const pj = json.primary_justification;
+      if (pj) {
+        const arg = typeof pj === 'string' ? pj : (pj.argument ?? '');
+        const cite = typeof pj === 'object' ? (pj.citation ?? '') : '';
+        if (arg) lines.push('', 'PRIMARY ARGUMENT:', arg);
+        if (cite) lines.push(`Citation: ${cite}`);
+      }
+      if (json.weakest_point) lines.push('', 'WEAKEST POINT:', json.weakest_point);
+      break;
+    }
 
     default:
       return rawFallback ?? '';
   }
+
+  const result = lines.join('\n').trim();
+  return result || rawFallback || '';
 }
 
-// Stream multiple agent texts interleaved (round-robin word by word)
+// Stream multiple agent texts interleaved (round-robin word by word).
+// agentEntries: [{ agentId, text, data }] — data is the parsed JSON sent in agent_complete.
 async function streamAgentsParallel(res, agentEntries) {
   for (const s of agentEntries) {
     send(res, 'agent_start', { agentId: s.agentId });
   }
 
-  const streams = agentEntries.map(({ agentId, text }) => ({
+  const streams = agentEntries.map(({ agentId, text, data }) => ({
     agentId,
+    data,
     words: text.split(/(\s+)/),
     index: 0,
   }));
@@ -137,7 +158,8 @@ async function streamAgentsParallel(res, agentEntries) {
   }
 
   for (const s of streams) {
-    send(res, 'agent_complete', { agentId: s.agentId });
+    // Include the structured JSON so the frontend can render rich UI from it
+    send(res, 'agent_complete', { agentId: s.agentId, data: s.data ?? null });
   }
 }
 
@@ -218,22 +240,27 @@ app.post('/api/analyze', async (req, res) => {
       {
         agentId: 'denial_defender',
         text: formatAgentText('defender', defenderWave2JSON, defenderWave2Raw),
+        data: defenderWave2JSON,
       },
       {
         agentId: 'bias_auditor',
         text: formatAgentText('bias', biasJSON, biasResult?.content ?? ''),
+        data: biasJSON,
       },
       {
         agentId: 'precedent_agent',
         text: formatAgentText('precedent', precedentJSON, precedentResult?.content ?? ''),
+        data: precedentJSON,
       },
       {
         agentId: 'circumstance_agent',
         text: formatAgentText('circumstance', circumstanceJSON, circumstanceResult?.content ?? ''),
+        data: circumstanceJSON,
       },
       {
         agentId: 'legal_agent',
         text: formatAgentText('legal', legalJSON, legalResult?.content ?? ''),
+        data: legalJSON,
       },
     ].filter(e => e.text.trim());
 

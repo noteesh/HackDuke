@@ -99,7 +99,7 @@ export default function DenialInput({ denialText, onTextChange, onSubmit }) {
         </div>
 
         <p className="text-center text-[#3f3f46] text-xs mt-5">
-          Demo — mock data only, no real API calls
+          Powered by IBM watsonx Orchestrate — 8 AI agents
         </p>
       </div>
     </div>
