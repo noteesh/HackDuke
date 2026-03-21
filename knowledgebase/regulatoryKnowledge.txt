@@ -1,0 +1,158 @@
+DENIAL DEFENDER KNOWLEDGE BASE
+================================
+
+--- DOCUMENT 1: 12 CFR §1002.6 — Rules Concerning Evaluation of Applications ---
+Source: Electronic Code of Federal Regulations (eCFR), Title 12, Chapter X, Part 1002
+
+GENERAL RULE:
+"Except as otherwise provided in the Act and this part, a creditor may consider any 
+information obtained, so long as the information is not used to discriminate against 
+an applicant on a prohibited basis."
+
+PROHIBITED BASIS RULE:
+"A creditor shall not take a prohibited basis into account in any system of evaluating 
+the creditworthiness of applicants."
+
+PERMITTED CRITERIA — AGE:
+"In an empirically derived, demonstrably and statistically sound, credit scoring system, 
+a creditor may use an applicant's age as a predictive variable, provided that the age 
+of an elderly applicant is not assigned a negative factor or value."
+"In a judgmental system of evaluating creditworthiness, a creditor may consider an 
+applicant's age or whether an applicant's income derives from any public assistance 
+program only for the purpose of determining a pertinent element of creditworthiness."
+
+PERMITTED CRITERIA — IMMIGRATION STATUS:
+"A creditor may consider the applicant's immigration status or status as a permanent 
+resident of the United States, and any additional information that may be necessary 
+to ascertain the creditor's rights and remedies regarding repayment."
+
+MARITAL STATUS:
+"A creditor shall evaluate married and unmarried applicants by the same standards."
+
+RACE, COLOR, RELIGION, NATIONAL ORIGIN, SEX:
+"A creditor shall not consider race, color, religion, national origin, or sex in any 
+aspect of a credit transaction."
+
+EFFECTS TEST (DEFENDER USE — LIMITS DISPARATE IMPACT CLAIMS):
+"The Act and regulation may prohibit a creditor practice that is discriminatory in 
+effect because it has a disproportionately negative impact on a prohibited basis, 
+even though the creditor has no intent to discriminate." [Note for Defender: This 
+is the standard the attacker must meet — use it to challenge weak disparate impact 
+arguments that lack statistical rigor.]
+
+
+--- DOCUMENT 2: Fannie Mae Selling Guide — B3-6-02, Debt-to-Income Ratios ---
+Source: Fannie Mae Selling Guide, Section B3-6-02 (updated May 2022)
+
+MANUAL UNDERWRITING DTI LIMITS:
+"For manually underwritten loans, Fannie Mae's maximum total DTI ratio is 36% of 
+the borrower's stable monthly income. The maximum can be exceeded up to 45% if 
+the borrower meets the credit score and reserve requirements reflected in the 
+Eligibility Matrix."
+
+AUTOMATED UNDERWRITING (DU) DTI LIMITS:
+"For loan casefiles underwritten through DU, the maximum allowable DTI ratio is 50%."
+
+LENDER DISCRETION:
+"Fannie Mae acknowledges that lenders may sometimes apply a more conservative approach 
+when qualifying borrowers. This is acceptable as long as Fannie Mae's minimum 
+requirements are met, and lenders consistently apply the same approach to similar loans."
+
+KEY DEFENDER USE: If a denial cites high DTI, Defender can cite these thresholds 
+to justify the denial as within industry-standard parameters. The consistency 
+requirement ("same approach to similar loans") is also a defense against selective 
+application claims.
+
+
+--- DOCUMENT 3: Fannie Mae Selling Guide — B3-3.5-01, Self-Employed Borrowers ---
+Source: Fannie Mae Selling Guide, Section B3-3.5-01
+
+INCOME HISTORY REQUIREMENT:
+"Fannie Mae generally requires lenders to obtain a two-year history of the borrower's 
+prior earnings as a means of demonstrating the likelihood that the income will 
+continue to be received."
+
+BUSINESS DEBT:
+"Any business debt on which the borrower is personally obligated must be included 
+in the total monthly obligations when calculating the debt-to-income ratio."
+
+KEY DEFENDER USE: Denials citing insufficient income documentation for self-employed 
+applicants are backed by this two-year history requirement.
+
+
+--- DOCUMENT 4: Texas Dept. of Housing v. Inclusive Communities Project, 576 U.S. 519 (2015) ---
+Source: U.S. Supreme Court, Justice Kennedy majority opinion
+
+DISPARATE IMPACT IS COGNIZABLE BUT LIMITED:
+"A disparate-impact claim relying on a statistical disparity must fail if the plaintiff 
+cannot point to a defendant's policy or policies causing that disparity."
+
+ROBUST CAUSALITY REQUIREMENT (Defender's primary weapon against bias claims):
+"A robust causality requirement is important in ensuring that defendants do not resort 
+to racial quotas... A plaintiff who fails to allege facts at the pleading stage or 
+produce statistical evidence demonstrating a causal connection cannot make out a 
+prima facie case of disparate impact."
+
+BUSINESS NECESSITY DEFENSE:
+"An important and appropriate means of ensuring that disparate-impact liability is 
+properly limited is to give housing authorities and private developers leeway to state 
+and explain the valid interest their policies serve, an analysis that is analogous to 
+Title VII's business necessity standard."
+
+ONE-TIME DECISIONS NOT SUFFICIENT:
+"A plaintiff challenging the decision of a private developer to construct a new building 
+in one location rather than another will not easily be able to show this is a policy 
+causing a disparate impact because such a one-time decision may not be a policy at all."
+
+KEY DEFENDER USE: This is the Defender's single most powerful case. Use it to rebut 
+any Bias Auditor argument that relies on statistical correlation alone without 
+demonstrating a specific, identifiable policy causing the disparity. If the Bias 
+Auditor cannot name the specific policy — not just the outcome — the Defender 
+cites this case to demand dismissal of the discrimination argument.
+
+
+--- DOCUMENT 5: ECOA / Regulation B — Adverse Action Notice Requirements ---
+Source: 12 CFR §1002.9, NCUA Examination Reference
+
+REQUIRED NOTICE LANGUAGE:
+"The federal Equal Credit Opportunity Act prohibits creditors from discriminating 
+against credit applicants on the basis of race, color, religion, national origin, 
+sex, marital status, age (provided the applicant has the capacity to enter into a 
+binding contract); because all or part of the applicant's income derives from any 
+public assistance program; or because the applicant has in good faith exercised 
+any right under the Consumer Credit Protection Act."
+
+INADVERTENT ERROR DEFENSE:
+"If the violation of 12 CFR §§1002.6(b)(6), 1002.9, 1002.10, 1002.12, or 1002.13 
+results from an inadvertent error, namely a mechanical, electronic, or clerical 
+error that the creditor demonstrates was not intentional and occurred notwithstanding 
+the maintenance of procedures reasonably adapted to avoid such errors, there is no 
+violation."
+
+KEY DEFENDER USE: If the Legal Agent argues a procedural ECOA violation, the 
+Defender can cite the inadvertent error safe harbor — as long as the institution 
+has documented procedures in place.
+
+
+--- DOCUMENT 6: Business Necessity Framework (from Inclusive Communities + Griggs v. Duke Power) ---
+Source: Synthesized from 576 U.S. 519 (2015) and 401 U.S. 424 (1971)
+
+THREE-PART BUSINESS NECESSITY DEFENSE:
+1. The criteria serves a legitimate business objective
+2. The criteria is applied uniformly across all applicants  
+3. No less discriminatory alternative achieves the same objective with equal effectiveness
+
+If all three prongs are met, business necessity is a complete defense even against 
+disparate impact claims.
+
+GRIGGS STANDARD: The Court in Griggs v. Duke Power Co. established that facially 
+neutral employment practices with discriminatory effects could be justified if they 
+bear "a demonstrable relationship to successful performance" — i.e., business necessity. 
+This standard was explicitly extended to fair lending by Congress and applied to 
+housing by Inclusive Communities.
+
+KEY DEFENDER USE: For any denial based on objective, uniformly-applied underwriting 
+criteria (credit score minimums, DTI thresholds, income verification requirements), 
+the Defender argues all three prongs are met. The criteria is financially necessary, 
+applied uniformly, and no less discriminatory alternative achieves the same risk 
+management objective.

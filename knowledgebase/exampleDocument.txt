@@ -1,0 +1,31 @@
+DENIAL LETTER FORMAT REFERENCE
+
+FCRA Adverse Action Notice (required for credit denials):
+- Must state specific reasons (not just "our system")
+- Must include credit score if used (score, range, date, bureau name)
+- Must include right to free credit report within 60 days
+- Common reason codes: insufficient credit history, high debt-to-income ratio, 
+  derogatory marks, insufficient income, too many recent inquiries, 
+  length of credit history, high revolving utilization
+
+HUD/FHA Housing Denial Format:
+- Must cite specific program criteria not met
+- Must include appeal rights and deadline (typically 30 days)
+- Often references 24 CFR Part 203
+
+Insurance Claim Denial Format:
+- Must cite specific policy exclusion or coverage limitation
+- Must include internal appeal process (first level)
+- Must include external review rights for health insurance (ACA requirement)
+- Often includes claim number and adjuster name
+
+Government Benefits Denial (SNAP, Medicaid, SSI):
+- Must cite specific eligibility criterion not met
+- Must include fair hearing rights
+- Must include deadline for requesting hearing (typically 90 days)
+- Will reference specific federal/state regulation
+
+Common Sparse Denial Letters (algorithmic/automated):
+- Often only say "did not meet our criteria" or "based on your credit profile"
+- May reference a score without explaining thresholds
+- Absence of specific reasons is itself legally significant — flag this

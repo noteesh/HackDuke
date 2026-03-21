@@ -1,0 +1,172 @@
+PRECEDENT AGENT KNOWLEDGE BASE
+================================
+
+--- DOCUMENT 1: DOJ + CFPB v. Ally Financial (2013) ---
+Source: DOJ Press Release, CFPB Enforcement Action, December 20 2013
+$98 million settlement — largest auto loan discrimination settlement in US history at the time.
+
+KEY FACTS:
+- Ally charged approximately 235,000 African-American, Hispanic, and Asian/Pacific 
+  Islander borrowers higher interest rates than similarly-situated white borrowers
+- Discrimination was detected entirely through surname and zip code proxy analysis — 
+  Ally's loan data contained NO race or ethnicity information
+- The CFPB used its BISG proxy methodology (surname + geography) to establish 
+  discrimination without any direct race data
+- "Ally discriminates most severely against the most creditworthy minority borrowers" 
+  — DOJ complaint finding
+- Ally's defense: "our process for evaluating contracts does not include information 
+  on a consumer's race or ethnicity" — this defense FAILED
+- Ally failed to monitor dealer markups for discrimination and failed to require 
+  dealers to document markup decisions
+
+PRECEDENT VALUE:
+This is the landmark case establishing that surname-based proxy discrimination in 
+consumer lending triggers ECOA liability even when the lender claims it never 
+collected race data. The defense "we don't collect race information" is explicitly 
+not a defense — Ally made exactly this argument and lost. Any denial involving an 
+applicant with a surname correlated with a protected class, processed by an 
+automated system with no discrimination monitoring, falls directly within this 
+enforcement pattern.
+
+DIRECT APPLICATION TO AUTOLEND DENIAL:
+- Applicant surname "Martinez" = high Hispanic probability under CFPB BISG methodology
+- AutoLend used "Automated Decisioning Department" = same automated system Ally used
+- No evidence of discrimination monitoring = same compliance failure Ally had
+- Result: This case is direct precedent, not merely analogous
+
+
+--- DOCUMENT 2: DOJ + CFPB v. Trident Mortgage Company (2022) ---
+Source: CFPB Enforcement Actions, September 2022
+
+KEY FACTS:
+- Joint DOJ/CFPB complaint against Trident for redlining and discrimination on 
+  basis of race and national origin in the Philadelphia metro area
+- Trident discouraged minority applicants through marketing, office locations, 
+  and loan officer conduct — none of this required explicit race data
+- Settlement required $22 million in relief to affected communities
+- Trident ceased originating mortgages before the complaint was filed — the 
+  enforcement action proceeded anyway
+- CFPB's 2023 Fair Lending Report specifically cited Trident as a landmark case 
+  for algorithmic and geographic discrimination enforcement
+
+PRECEDENT VALUE:
+Establishes that discrimination through geographic proxies and automated systems 
+is actionable even in the absence of explicit discriminatory intent. The CFPB 
+pursued this case despite Trident shutting down — demonstrating that enforcement 
+of proxy discrimination is an active, escalating priority not a theoretical concern.
+
+
+--- DOCUMENT 3: CFPB v. Navient (2017–2024) ---
+Source: CFPB Enforcement Action, Stipulated Final Judgment September 12 2024
+$120 million settlement — $100 million restitution + $20 million civil penalty.
+
+KEY FACTS:
+- Navient systematically provided inadequate and misleading information to borrowers 
+  about their repayment options, steering them into more costly forbearance instead 
+  of income-driven repayment plans
+- The court's final order specifically required: "In the event that Navient denies 
+  cosigner release, Navient will provide the borrower a denial letter that clearly 
+  and conspicuously provides the reasons for such denial"
+- This denial notice requirement was a remedial obligation — meaning Navient's 
+  FAILURE to provide clear denial reasons was itself a violation
+- Navient permanently banned from servicing federal student loans
+- 29 state attorneys general filed parallel actions — demonstrating that inadequate 
+  denial notices trigger multi-jurisdictional liability
+
+PRECEDENT VALUE:
+Directly establishes that denial letters must clearly and conspicuously state specific 
+reasons. AutoLend's denial letter citing "Automated Decisioning Department" and vague 
+reasons without specific thresholds falls within the exact pattern Navient was penalized 
+for. The court order's explicit remedial language on denial notices is direct authority.
+
+
+--- DOCUMENT 4: Anderson v. United Finance Co. ---
+Source: 666 F.2d 1274 (9th Cir. 1983)
+
+KEY HOLDING:
+The Ninth Circuit established that ECOA adverse action notices must provide reasons 
+specific enough to allow the applicant to understand the basis of the denial and take 
+meaningful corrective action. Generic reasons that do not identify the actual factors 
+applied are legally insufficient.
+
+DIRECT APPLICATION:
+AutoLend's denial cites "debt-to-income ratio exceeds acceptable threshold" without 
+stating what the threshold is, what the applicant's actual ratio was, or how far 
+they were from qualifying. Under Anderson, this is insufficient — the applicant 
+cannot take corrective action without knowing the actual threshold applied.
+
+PRECEDENT VALUE:
+This is the foundational circuit court case on adverse action notice specificity. 
+Every subsequent CFPB guidance on adverse action notices (including Circular 2023-03) 
+traces back to this standard. It is directly applicable to any denial that uses 
+vague categorical reasons without specific figures.
+
+
+--- DOCUMENT 5: CFPB v. Citibank N.A. (2023) ---
+Source: CFPB Enforcement Action, 2023
+
+KEY FACTS:
+- CFPB enforcement action against Citibank for discrimination on basis of national 
+  origin in credit card underwriting
+- Citibank discriminated against Armenian-American applicants by applying heightened 
+  scrutiny and additional requirements based on surname patterns associated with 
+  Armenian national origin
+- Citibank's system did not explicitly flag national origin — discrimination was 
+  inferred from surname-based processing patterns
+- Settlement required remediation and compliance program overhaul
+
+PRECEDENT VALUE:
+Most recent major enforcement action for surname-based national origin discrimination 
+in consumer lending. Directly analogous to any denial involving a Hispanic or 
+other minority surname processed through an automated system. Establishes that 
+surname-pattern discrimination in credit underwriting is actively enforced in 2023, 
+not a legacy issue.
+
+
+--- DOCUMENT 6: CFPB Circular 2023-03 — Adverse Action Notice Requirements ---
+Source: CFPB Circular 2023-03
+URL: consumerfinance.gov/compliance/circulars/circular-2023-03
+
+KEY HOLDINGS:
+"Creditors may not simply use checklist-style forms if they do not reflect the 
+actual reason for the denial of credit or other adverse action."
+
+"This requirement is especially important with the growth of advanced algorithms 
+and personal consumer data in credit underwriting."
+
+"The legal requirement to explain the reasons for adverse actions helps improve 
+consumers' chances for future credit and protects consumers from illegal 
+discrimination and serves an educational role."
+
+DIRECT APPLICATION:
+AutoLend's denial states three generic reasons with no specific figures, no 
+thresholds, and no explanation of how the automated system weighted each factor. 
+Circular 2023-03 explicitly addresses this scenario — checklist-style algorithmic 
+denial reasons that do not reflect the actual decisioning factors are non-compliant. 
+This is a procedural violation independent of any discrimination finding.
+
+
+--- DOCUMENT 7: DOJ Fair Lending Enforcement — Pattern and Practice Standard ---
+Source: DOJ Civil Rights Division, Fair Lending Enforcement
+URL: justice.gov/crt/fair-lending
+
+KEY STANDARD:
+Under ECOA Section 706(g), the DOJ has authority to sue when it has reason to 
+believe a creditor has engaged in a "pattern or practice" of discrimination. 
+The DOJ does not need to prove individual discriminatory intent — statistical 
+evidence of disparate outcomes combined with a specific identifiable policy is 
+sufficient to establish a pattern or practice claim.
+
+ENFORCEMENT HISTORY RELEVANT TO PERSONAL LOAN DENIALS:
+- 2022: 23 ECOA discrimination referrals to DOJ — up 91% from 2020
+- Referrals included discrimination on basis of national origin, race, sex, 
+  marital status, and public assistance income
+- NCUA referred 5 cases specifically related to consumer loan underwriting 
+  (not mortgages) — establishing that personal loan discrimination is 
+  actively referred
+
+DIRECT APPLICATION:
+An automated personal loan denial of a Hispanic applicant with vague reasons 
+and no discrimination monitoring falls squarely within the referral patterns 
+documented in the 2023 CFPB Fair Lending Report. The 91% increase in referrals 
+establishes this is an escalating enforcement priority.

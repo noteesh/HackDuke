@@ -1,0 +1,227 @@
+BIAS AUDITOR KNOWLEDGE BASE
+=============================
+
+--- DOCUMENT 1: ECOA / 12 CFR §1002.6 — Prohibited Bases ---
+Source: eCFR, Title 12, Chapter X, Part 1002, Section 1002.6
+
+PROHIBITED BASES UNDER ECOA:
+"A creditor shall not take a prohibited basis into account in any system of evaluating 
+the creditworthiness of applicants."
+
+Prohibited bases are: race, color, religion, national origin, sex, marital status, 
+age (provided applicant has capacity to contract), public assistance income, and 
+good faith exercise of rights under the Consumer Credit Protection Act.
+
+EFFECTS TEST — DISPARATE IMPACT:
+"The Act and regulation may prohibit a creditor practice that is discriminatory in 
+effect because it has a disproportionately negative impact on a prohibited basis, 
+even though the creditor has no intent to discriminate. Congressional intent that 
+this doctrine apply to the credit area is documented in the Senate Report that 
+accompanied H.R. 6516, No. 94-589, pp. 4-5."
+
+KEY USE: Even facially neutral denial criteria (DTI, credit score thresholds, 
+income type) can violate ECOA if they produce a disparate impact on a protected 
+class AND the institution cannot justify them by business necessity.
+
+
+--- DOCUMENT 2: CFPB BISG Proxy Methodology ---
+Source: CFPB, "Using Publicly Available Information to Proxy for Unidentified Race 
+and Ethnicity" (September 2014, updated April 2024)
+URL: https://www.consumerfinance.gov/data-research/research-reports/using-publicly-
+available-information-to-proxy-for-unidentified-race-and-ethnicity/
+
+THE CFPB'S OWN TOOL FOR DETECTING PROXY DISCRIMINATION:
+"In conducting fair lending analysis in both supervisory and enforcement contexts, 
+the Bureau's Office of Research and Division of Supervision, Enforcement, and Fair 
+Lending rely on a Bayesian Improved Surname Geocoding (BISG) proxy method, which 
+combines geography and surname-based information into a single proxy probability 
+for race and ethnicity."
+
+HOW IT WORKS:
+The CFPB uses applicant surnames cross-referenced against U.S. Census surname data 
+(167,409 surnames as of 2017 update) to calculate the probability that an applicant 
+belongs to a particular racial/ethnic group. Geography (zip code, census tract) is 
+combined with surname via Bayesian analysis to produce a probability score.
+
+KEY USE — SURNAME AS PROXY SIGNAL:
+"One method used by lenders to check the probability that an applicant is Hispanic 
+or Asian is to use the last name database published by the Census Bureau, in which 
+the Census Bureau reports, by race and national origin, the percentage of individuals 
+with a given surname." (CFPB, Preventing Illegal Discrimination in Auto Lending)
+
+AUDIT INSTRUCTION: When the applicant has a surname associated with a specific 
+racial or ethnic group, flag this as a proxy discrimination signal. The CFPB itself 
+uses this exact methodology to detect discrimination. If the denial correlates with 
+a high-probability surname, it is a valid signal under the CFPB's own standards.
+
+GEOGRAPHY AS PROXY:
+"Another method to proxy for race and national origin uses the demographics of the 
+census geography (e.g., census tract or block group) in which an individual's 
+residence is located, and assigns probabilities about the individual's race or 
+national origin based on the demographics of that area."
+
+KEY USE: If a zip code or address is present in the denial, flag geographic proxy 
+discrimination. The CFPB treats geography as a proxy for race in every fair lending 
+examination.
+
+
+--- DOCUMENT 3: Interagency Fair Lending Examination Procedures ---
+Source: Federal Reserve / FFIEC, Interagency Fair Lending Examination Procedures
+URL: https://www.federalreserve.gov/boarddocs/caletters/2009/0906/09-06_attachment.pdf
+
+THREE FORMS OF LENDING DISCRIMINATION:
+
+1. OVERT DISCRIMINATION:
+"There is overt evidence of discrimination when a lender openly discriminates on a 
+prohibited basis."
+
+2. DISPARATE TREATMENT:
+"Disparate treatment occurs when a lender treats a credit applicant differently 
+based on one of the prohibited bases. It does not require any showing that the 
+treatment was motivated by prejudice or a conscious intention to discriminate."
+
+3. DISPARATE IMPACT:
+"The fact that a policy or practice creates a disparity on a prohibited basis is 
+not alone proof of a violation. When an Agency finds that a lender's policy or 
+practice has a disparate impact, the next step is to seek to determine whether 
+the policy or practice is justified by business necessity. The justification must 
+be manifest and may not be hypothetical or speculative."
+
+LESS DISCRIMINATORY ALTERNATIVE STANDARD:
+"Even if a policy or practice that has a disparate impact on a prohibited basis 
+can be justified by business necessity, it still may be found to be in violation 
+if an alternative policy or practice could serve the same purpose with less 
+discriminatory effect."
+
+KEY USE: This is the Bias Auditor's procedural backbone. Use the three-part 
+framework to classify every finding. The "less discriminatory alternative" 
+standard is particularly powerful — even if the Denial Defender justifies the 
+criteria by business necessity, the Auditor can counter that alternative 
+criteria exist with less discriminatory effect.
+
+ALGORITHMIC LENDING FLAG:
+"This requirement [to explain reasons for adverse action] is especially important 
+with the growth of advanced algorithms and personal consumer data in credit 
+underwriting." (CFPB Fair Lending Report 2023)
+"Vast troves of consumer sensitive data are fueling highly complex black box 
+algorithms in lending." (CFPB 2023 Fair Lending Report)
+
+KEY USE: If the denial letter comes from an "Automated Decisioning Department" 
+or references algorithmic review with no human oversight, flag this explicitly. 
+The CFPB has stated this is a heightened risk area requiring enhanced scrutiny.
+
+
+--- DOCUMENT 4: CFPB Fair Lending Report 2023 ---
+Source: CFPB Fair Lending Report FY 2023, released June 2024
+URL: https://files.consumerfinance.gov/f/documents/cfpb_fair-lending-report_fy-2023.pdf
+
+ALGORITHMIC MODELS UNDER SCRUTINY:
+"The CFPB directed institutions to test credit scoring models for prohibited basis 
+disparities and to require documentation of considerations the institutions will 
+give to how to assess those disparities against the stated business needs."
+
+"Institutions were directed to develop a process for the consideration of a range 
+of less discriminatory models."
+
+"Institutions were directed to test and validate the methodologies used to identify 
+principal reasons in adverse action notices required under ECOA and Regulation B."
+
+ENFORCEMENT TREND:
+"The FDIC, NCUA, Federal Reserve, and CFPB referred 23 suspected cases of ECOA 
+discrimination violations to the Justice Department in 2022 — up 91% from 2020. 
+Cases included discrimination on the basis of national origin, sex, public 
+assistance payments, race, marital status, and age."
+
+KEY USE: Use the 91% referral increase to establish that algorithmic discrimination 
+is an active enforcement priority, not a theoretical concern. If the denial is 
+algorithmic and the applicant has a surname or geography with demographic signal, 
+this is precisely the enforcement pattern CFPB is actively investigating.
+
+
+--- DOCUMENT 5: Known Proxy Variables for Discrimination ---
+Source: Synthesized from CFPB Proxy Methodology Report (2014), 
+Interagency Fair Lending Examination Procedures, and CFPB enforcement actions
+
+ESTABLISHED PROXY VARIABLES AND THEIR PROTECTED CLASS CORRELATIONS:
+
+SURNAME → RACE / NATIONAL ORIGIN:
+The CFPB uses Census Bureau surname data to assign racial/ethnic probability 
+scores to applicants. Surnames with high Hispanic probability include: 
+Martinez, Garcia, Rodriguez, Lopez, Hernandez, Gonzalez, Perez, Sanchez, 
+Torres, Ramirez. Surnames with high Asian probability include: Chen, Wang, 
+Kim, Patel, Singh, Lee, Zhang, Liu, Nguyen, Park.
+
+GEOGRAPHY / ZIP CODE → RACE:
+Census tract and zip code demographics are used by the CFPB as a proxy for 
+race in every fair lending examination. A denial in a zip code with high 
+minority population concentration is a recognized proxy signal.
+
+INCOME TYPE (PUBLIC ASSISTANCE) → RACE / SEX / MARITAL STATUS:
+12 CFR §1002.6 explicitly prohibits using public assistance income as a 
+denial criterion. This criterion correlates with race (Black and Hispanic 
+recipients are statistically overrepresented), sex (women are 
+statistically overrepresented), and marital status (single-parent households).
+
+GIG / CONTRACTOR INCOME → SEX / RACE:
+Gig economy income documentation requirements that exceed standard W-2 
+requirements can have disparate impact on racial minorities and women, 
+who are statistically overrepresented in gig work. 
+(Source: BLS Current Population Survey data)
+
+"INSUFFICIENT CREDIT HISTORY" → RACE / NATIONAL ORIGIN:
+The CFPB's 2015 report "Data Point: Credit Invisibles" found that 
+26 million Americans are credit invisible, and this status is 
+disproportionately concentrated among Black, Hispanic, and immigrant 
+populations. Using thin-file status as a disqualifying criterion without 
+considering alternative credit data has recognized disparate impact.
+
+DTI THRESHOLDS BELOW REGULATORY MAXIMUM → POTENTIAL DISPARATE IMPACT:
+Lenders who apply DTI thresholds below Fannie Mae's published maximums 
+without documented business necessity create potential disparate impact 
+exposure. The more conservative the internal threshold vs. the regulatory 
+floor, the stronger the disparate impact signal.
+
+
+--- DOCUMENT 6: CFPB Circular 2023-03 — Adverse Action Notice Requirements ---
+Source: CFPB Circular 2023-03
+URL: https://www.consumerfinance.gov/compliance/circulars/circular-2023-03-adverse-
+action-notification-requirements-and-the-proper-use-of-the-cfpbs-sample-forms-
+provided-in-regulation-b/
+
+ALGORITHMIC ADVERSE ACTION NOTICES:
+"Creditors may not simply use checklist-style forms if they do not reflect the 
+actual reason for the denial of credit or other adverse action. This requirement 
+is especially important with the growth of advanced algorithms and personal 
+consumer data in credit underwriting."
+
+"The legal requirement to explain the reasons for adverse actions helps improve 
+consumers' chances for future credit and protects consumers from illegal 
+discrimination and serves an educational role, allowing consumers to understand 
+the reasons for a creditor's action and take steps to improve their credit status 
+or rectify mistakes."
+
+KEY USE: If the denial states generic reasons like "did not meet our criteria" 
+or "based on your credit profile" without specificity, this violates the adverse 
+action notice requirement AND is a recognized discrimination concealment risk. 
+Vague reasons prevent consumers from detecting the true discriminatory basis.
+
+
+--- DOCUMENT 7: Texas Dept of Housing v. Inclusive Communities (2015) ---
+Source: 576 U.S. 519, Justice Kennedy majority opinion
+
+DISPARATE IMPACT REQUIRES A SPECIFIC POLICY — NOT JUST AN OUTCOME:
+"A disparate-impact claim relying on a statistical disparity must fail if the 
+plaintiff cannot point to a defendant's policy or policies causing that disparity."
+
+WHY THIS MATTERS FOR THE BIAS AUDITOR:
+This cuts both ways. The Bias Auditor must identify the SPECIFIC policy causing 
+the disparity — not just note a correlation. For the sample denial:
+- The specific policy is: using automated credit scoring without alternative 
+  data inputs for thin-file applicants
+- The disparity it produces: thin-file status disproportionately affects 
+  Hispanic and Black applicants per CFPB's own Credit Invisibles report
+- The causal chain: automated system → thin file disqualification → disparate 
+  impact on protected class
+
+This is a complete prima facie disparate impact argument that meets the 
+Inclusive Communities causality standard.

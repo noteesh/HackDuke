@@ -1,0 +1,237 @@
+LEGAL AGENT KNOWLEDGE BASE
+============================
+
+--- DOCUMENT 1: ECOA 15 U.S.C. §1691 — Core Prohibition and Adverse Action ---
+Source: U.S. Code, Title 15, Chapter 41, Subchapter IV
+
+CORE PROHIBITION:
+"It shall be unlawful for any creditor to discriminate against any applicant, 
+with respect to any aspect of a credit transaction on the basis of race, color, 
+religion, national origin, sex or marital status, or age (provided the applicant 
+has the capacity to contract); because all or part of the applicant's income 
+derives from any public assistance program; or because the applicant has in good 
+faith exercised any right under this chapter."
+
+ADVERSE ACTION NOTICE REQUIREMENT — §1691(d):
+"Within thirty days after receipt of a completed application, the creditor shall 
+notify the applicant of action taken."
+
+"Each applicant against whom adverse action is taken shall be entitled to a 
+statement of reasons for such action from the creditor."
+
+SPECIFICITY REQUIREMENT — §1691(d)(3):
+"A statement of reasons meets the requirements of this section ONLY if it 
+contains the SPECIFIC reasons for the adverse action taken."
+
+RIGHT TO REQUEST REASONS:
+Applicant has the right to request specific reasons within 60 days of receiving 
+the denial notice. Creditor must respond within 30 days of that request.
+
+PRIVATE RIGHT OF ACTION — §1691e:
+Consumers may bring a civil action for actual damages, punitive damages up to 
+$10,000, and attorney's fees. Class actions available for systemic violations.
+
+STATUTE OF LIMITATIONS:
+5 years from date of violation for individual actions.
+
+
+--- DOCUMENT 2: Regulation B — 12 CFR §1002.9 — Adverse Action Procedures ---
+Source: eCFR, Title 12, Chapter X, Part 1002, Section 1002.9
+
+TIMING REQUIREMENT:
+"A creditor shall notify an applicant of action taken within 30 days after 
+receiving a completed application."
+
+CONTENT REQUIREMENTS — WHAT MUST BE IN THE NOTICE:
+The notification must contain:
+1. A statement of the action taken
+2. The name and address of the creditor
+3. A statement of ECOA antidiscrimination provisions
+4. The name and address of the federal agency that administers compliance
+5. SPECIFIC REASONS for the adverse action (or right to request them)
+
+SPECIFICITY STANDARD:
+"The statement of reasons must be specific and indicate the principal reason(s) 
+for taking adverse action. Creditors should disclose up to four principal reasons."
+
+ALGORITHMIC DECISIONS — NO EXCEPTION:
+"Creditors who use complex algorithms, including artificial intelligence or 
+machine learning, in any aspect of their credit decisions must still provide 
+a notice that discloses the specific principal reasons for taking an adverse 
+action." (CFPB Circular 2022-03)
+
+"A creditor's lack of understanding of its own methods is therefore NOT a 
+cognizable defense against liability for violating ECOA and Regulation B's 
+requirements." (CFPB Circular 2022-03)
+
+DIRECT APPLICATION TO AUTOLEND DENIAL:
+AutoLend cited "debt-to-income ratio exceeds acceptable threshold" without 
+stating: (a) what the threshold is, (b) what the applicant's ratio was, or 
+(c) how the automated system determined the ratio. Under 12 CFR §1002.9 and 
+CFPB Circular 2022-03, this is insufficient — the applicant cannot identify 
+or correct the issue without these specifics.
+
+
+--- DOCUMENT 3: CFPB Circular 2022-03 — Algorithmic Adverse Action Notices ---
+Source: CFPB Circular 2022-03, consumerfinance.gov/compliance/circulars/
+circular-2022-03
+
+KEY HOLDINGS:
+
+"Creditors may not simply use checklist-style forms if they do not reflect 
+the actual reason for the denial of credit or other adverse action."
+
+"Whether a creditor is using a sophisticated machine learning algorithm or more 
+conventional methods to evaluate an application, the legal requirement is the 
+same: the creditor must provide the specific principal reasons for the adverse 
+action taken."
+
+"A creditor's lack of understanding of its own methods is NOT a cognizable 
+defense against liability."
+
+"While some creditors may rely upon various post-hoc explanation methods, 
+such explanations approximate models and creditors must still be able to 
+validate the accuracy of those approximations."
+
+CASE CITATIONS IN CIRCULAR:
+"Fischl v. Gen. Motors Acceptance Corp., 708 F.2d 143, 146 (5th Cir. 1983) 
+— calling the notice requirements 'perhaps the most significant of the 1976 
+amendments to the ECOA.'"
+
+"Treadway v. Gateway Chevrolet Oldsmobile Inc., 362 F.3d 971, 977-78 
+(7th Cir. 2004) — notice requirement is 'a strong and necessary adjunct 
+to the antidiscrimination purpose of the legislation.'"
+
+VIOLATION STANDARD FOR AUTOLEND:
+AutoLend's "Automated Decisioning Department" language is precisely the 
+scenario this Circular addresses. The institution cannot use algorithmic 
+complexity as a shield against providing specific reasons.
+
+
+--- DOCUMENT 4: FCRA 15 U.S.C. §1681m — Requirements on Users of Consumer Reports ---
+Source: U.S. Code, Title 15, §1681m (Section 615)
+
+ADVERSE ACTION NOTICE REQUIREMENTS WHEN CREDIT REPORT IS USED:
+"If any person takes any adverse action with respect to any consumer that is 
+based in whole or in part on any information contained in a consumer report, 
+the person shall:
+(1) Provide oral, written, or electronic notice of the adverse action
+(2) Provide the name, address, and telephone number of the consumer reporting 
+    agency that furnished the report
+(3) Provide a statement that the CRA did not make the adverse decision and 
+    is unable to explain why the decision was made
+(4) Provide notice of the consumer's right to a free copy of the report 
+    within 60 days
+(5) Provide notice of the consumer's right to dispute the accuracy or 
+    completeness of the report"
+
+CREDIT SCORE DISCLOSURE REQUIREMENT (Dodd-Frank Amendment):
+When a credit score is used in an adverse action decision, the creditor must 
+disclose:
+- The numerical credit score
+- The range of possible scores
+- The key factors that adversely affected the score (up to 4 factors)
+- The date the score was created
+- The name of the consumer reporting agency that provided the score
+
+DIRECT APPLICATION TO AUTOLEND DENIAL:
+AutoLend disclosed the credit score (581, range 300-850, Experian, March 11) — 
+this is COMPLIANT. However, the denial does NOT disclose the key factors that 
+adversely affected the score as required by the Dodd-Frank amendment to FCRA 
+§615. The stated reasons ("insufficient credit history", "DTI", "delinquent 
+accounts") may or may not match the actual score factors — if they don't, 
+this is a separate FCRA violation.
+
+
+--- DOCUMENT 5: ECOA Damages and Remedies — 15 U.S.C. §1691e ---
+Source: U.S. Code, Title 15, §1691e
+
+PRIVATE RIGHT OF ACTION:
+Any applicant who has been subjected to a violation may bring a civil action 
+in federal court.
+
+DAMAGES AVAILABLE:
+- Actual damages (financial harm caused by the denial)
+- Punitive damages up to $10,000 for individual actions
+- Class action: lesser of $500,000 or 1% of net worth of creditor
+- Attorney's fees and costs (fee-shifting provision)
+
+ADMINISTRATIVE ENFORCEMENT:
+CFPB has primary enforcement authority. Can refer to DOJ for pattern and 
+practice cases. State attorneys general may bring parallel actions.
+
+STATUTE OF LIMITATIONS:
+5 years from date of violation for individual actions. 1 year from 
+commencement of DOJ or agency action for related private suits.
+
+FILING OPTIONS:
+1. CFPB complaint portal: consumerfinance.gov/complaint
+2. Federal court civil action (private right of action)
+3. State AG complaint (parallel state enforcement)
+4. DOJ Civil Rights Division (pattern and practice referral)
+
+
+--- DOCUMENT 6: CFPB Circular 2023-03 — Adverse Action and Algorithmic Specificity ---
+Source: CFPB Circular 2023-03, consumerfinance.gov/compliance/circulars/
+circular-2023-03
+
+UPDATED STANDARD FOR ALGORITHMIC DENIALS:
+"Creditors may not simply use checklist-style forms if they do not reflect 
+the actual reason for the denial of credit or other adverse action. This 
+requirement is especially important with the growth of advanced algorithms 
+and personal consumer data in credit underwriting."
+
+"The legal requirement to explain the reasons for adverse actions helps 
+improve consumers' chances for future credit and protects consumers from 
+illegal discrimination and serves an educational role, allowing consumers 
+to understand the reasons for a creditor's action and take steps to improve 
+their credit status or rectify mistakes."
+
+SPECIFIC VIOLATION PATTERN:
+If the model uses dozens of variables but the adverse action notice lists 
+only three generic categories, the notice fails to reflect the actual reasons. 
+The creditor must identify which specific model inputs drove the decision — 
+not just broad categories.
+
+DISCLOSING CREDIT REPORT USAGE:
+"Disclosing that a credit report was obtained and used, as the FCRA requires, 
+does NOT satisfy the ECOA requirement to disclose specific reasons." 
+(12 CFR 1002.9(b)(2)-9)
+
+This means AutoLend's disclosure of Experian as the credit bureau does not 
+substitute for explaining the specific algorithmic decision factors.
+
+
+--- DOCUMENT 7: Federal Reserve — Top ECOA Violations 2023 ---
+Source: Federal Reserve Consumer Compliance Outlook, 2024 (Top Violations 2023)
+URL: consumercomplianceoutlook.org/2024/fourth-issue/common-violations-regulation-b/
+
+TOP DOCUMENTED VIOLATIONS IN 2023 EXAMINATIONS:
+
+1. FAILURE TO PROVIDE AAN WITHIN 30 DAYS:
+"A common violation was failing to provide an AAN within 30 days after 
+receiving a completed application on which adverse action was taken."
+
+2. INSUFFICIENT SPECIFICITY OF REASONS:
+"Regulation B requires the statement to be specific and indicate the 
+principal reason(s) for taking adverse action. Creditors should disclose 
+up to four principal reasons."
+
+"Finding that 'credit references are insufficient' was not an adequate 
+statement of reasons because it did not signal the nature of the deficiency." 
+(Fischl v. GMAC, 708 F.2d 143)
+
+3. MISSING FEDERAL AGENCY CONTACT INFORMATION:
+The adverse action notice must include the name and address of the federal 
+agency administering compliance for that creditor type. AutoLend's denial 
+letter does not include this — a documented common violation.
+
+4. MISSING APPEAL PROCESS INFORMATION:
+While not always legally required, absence of any appeal pathway combined 
+with vague reasons has been cited in examination findings as a fair lending 
+risk indicator.
+
+DIRECT APPLICATION:
+AutoLend's denial contains at least violations 2 and 3 above — insufficient 
+specificity and missing federal agency contact. These are the two most 
+commonly cited ECOA violations in 2023 examinations.
