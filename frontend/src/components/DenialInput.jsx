@@ -11,80 +11,95 @@ You have the right to request the specific reasons within 60 days.
 
 export default function DenialInput({ denialText, onTextChange, onSubmit }) {
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-6">
-      {/* Grid background */}
+    <div className="min-h-screen bg-[#0a0a0b] flex flex-col items-center justify-center p-6">
+      {/* Subtle radial glow behind content */}
       <div
-        className="fixed inset-0 opacity-5 pointer-events-none"
+        className="fixed inset-0 pointer-events-none"
         style={{
-          backgroundImage:
-            'linear-gradient(#f59e0b 1px, transparent 1px), linear-gradient(90deg, #f59e0b 1px, transparent 1px)',
-          backgroundSize: '40px 40px',
+          background: 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,102,241,0.07) 0%, transparent 70%)',
         }}
       />
 
-      <div className="relative z-10 w-full max-w-2xl">
+      <div className="relative z-10 w-full max-w-xl">
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <span className="text-5xl">⚡</span>
+          <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 mb-5">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
           </div>
-          <h1 className="text-5xl font-black text-white tracking-tight mb-3">
-            THE OVERRIDE
+          <h1 className="text-3xl font-bold text-white tracking-tight mb-3">
+            The Override
           </h1>
-          <p className="text-gray-400 text-base max-w-md mx-auto leading-relaxed">
-            Paste an algorithmic denial. Five AI agents will challenge it. If the
-            institution's own defense concedes 2+ arguments — the Override fires.
+          <p className="text-[#71717a] text-sm max-w-sm mx-auto leading-relaxed">
+            Paste an algorithmic denial. Five AI agents will challenge it in parallel.
+            If the institution's defense concedes 2+ arguments, the Override fires.
           </p>
         </div>
 
         {/* How it works */}
-        <div className="grid grid-cols-3 gap-3 mb-8 text-center">
+        <div className="grid grid-cols-3 gap-2.5 mb-7">
           {[
-            { icon: '📋', label: 'Paste denial', sub: 'loan · insurance · housing · benefits' },
-            { icon: '⚔️', label: '5 agents debate', sub: 'bias · precedent · law · circumstance' },
-            { icon: '⚡', label: 'Override fires', sub: '2+ concessions → appeal letter generated' },
+            { step: '01', label: 'Paste denial', sub: 'loan · insurance · housing' },
+            { step: '02', label: 'Agents debate', sub: 'bias · precedent · law' },
+            { step: '03', label: 'Override fires', sub: '2+ concessions trigger' },
           ].map((item) => (
-            <div key={item.label} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-              <div className="text-2xl mb-2">{item.icon}</div>
-              <div className="text-white text-sm font-semibold">{item.label}</div>
-              <div className="text-gray-500 text-xs mt-1">{item.sub}</div>
+            <div
+              key={item.step}
+              className="rounded-xl p-4 border"
+              style={{ background: '#111113', borderColor: 'rgba(255,255,255,0.07)' }}
+            >
+              <div className="text-[10px] font-bold text-[#6366f1] uppercase tracking-widest mb-2">{item.step}</div>
+              <div className="text-white text-xs font-semibold mb-1">{item.label}</div>
+              <div className="text-[#52525b] text-[11px] leading-snug">{item.sub}</div>
             </div>
           ))}
         </div>
 
-        {/* Input */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+        {/* Input card */}
+        <div
+          className="rounded-2xl border p-5"
+          style={{ background: '#111113', borderColor: 'rgba(255,255,255,0.08)' }}
+        >
           <div className="flex items-center justify-between mb-3">
-            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+            <label className="text-xs font-semibold text-[#a1a1aa] uppercase tracking-wider">
               Denial Letter
             </label>
             <button
               onClick={() => onTextChange(SAMPLE_DENIAL)}
-              className="text-xs text-amber-500 hover:text-amber-400 transition-colors underline underline-offset-2"
+              className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors font-medium"
             >
-              Load sample denial
+              Load sample
             </button>
           </div>
           <textarea
             value={denialText}
             onChange={(e) => onTextChange(e.target.value)}
             placeholder="Paste the denial letter here..."
-            rows={10}
-            className="w-full bg-gray-950 border border-gray-700 rounded-xl p-4 text-sm text-gray-200 placeholder-gray-600 resize-none focus:outline-none focus:border-amber-500 transition-colors font-mono leading-relaxed"
+            rows={9}
+            className="w-full rounded-xl p-4 text-sm text-[#e4e4e7] placeholder-[#3f3f46] resize-none focus:outline-none transition-colors leading-relaxed font-sans"
+            style={{
+              background: '#0a0a0b',
+              border: '1px solid rgba(255,255,255,0.07)',
+            }}
+            onFocus={e => e.target.style.borderColor = 'rgba(99,102,241,0.5)'}
+            onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.07)'}
           />
           <button
             onClick={onSubmit}
             disabled={!denialText.trim()}
-            className="mt-4 w-full py-4 rounded-xl font-black text-base tracking-widest uppercase transition-all
-              bg-amber-500 text-gray-950 hover:bg-amber-400 active:scale-[0.98]
-              disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-amber-500"
+            className="mt-4 w-full py-3.5 rounded-xl font-semibold text-sm tracking-wide transition-all text-white
+              disabled:opacity-30 disabled:cursor-not-allowed"
+            style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
+            onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.background = 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)'; }}
+            onMouseLeave={e => { if (!e.currentTarget.disabled) e.currentTarget.style.background = 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)'; }}
           >
-            ⚡ INITIATE OVERRIDE
+            Initiate Override
           </button>
         </div>
 
-        <p className="text-center text-gray-600 text-xs mt-6">
-          Using mock data — no real API calls made
+        <p className="text-center text-[#3f3f46] text-xs mt-5">
+          Demo — mock data only, no real API calls
         </p>
       </div>
     </div>

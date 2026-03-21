@@ -1,8 +1,8 @@
 const AGENT_NAMES = {
-  bias_auditor: { name: 'Bias Auditor', icon: '🔍' },
-  precedent_agent: { name: 'Precedent Agent', icon: '⚖️' },
-  circumstance_agent: { name: 'Circumstance Agent', icon: '🧩' },
-  legal_agent: { name: 'Legal Agent', icon: '📜' },
+  bias_auditor: { name: 'Bias Auditor' },
+  precedent_agent: { name: 'Precedent Agent' },
+  circumstance_agent: { name: 'Circumstance Agent' },
+  legal_agent: { name: 'Legal Agent' },
 };
 
 export default function RebuttalCard({ agentId, state }) {
@@ -15,54 +15,73 @@ export default function RebuttalCard({ agentId, state }) {
   const isConceded = status === 'conceded' || result === 'CONCEDED';
   const isRebutted = status === 'rebutted' || result === 'REBUTTED';
 
-  const borderClass = isConceded
-    ? 'border-red-700 bg-red-950/20'
+  const borderColor = isConceded
+    ? 'rgba(244,63,94,0.28)'
     : isRebutted
-    ? 'border-green-800 bg-green-950/10'
+    ? 'rgba(52,211,153,0.2)'
     : isActive
-    ? 'border-blue-800 bg-blue-950/20'
-    : 'border-gray-800 bg-gray-900/60';
+    ? 'rgba(99,102,241,0.22)'
+    : 'rgba(255,255,255,0.07)';
+
+  const bgColor = isConceded
+    ? 'rgba(244,63,94,0.05)'
+    : isRebutted
+    ? 'rgba(52,211,153,0.04)'
+    : isActive
+    ? 'rgba(99,102,241,0.04)'
+    : '#111113';
 
   const resultBadge = isConceded ? (
-    <span className="px-2 py-0.5 rounded text-xs font-black bg-red-900 text-red-300 border border-red-700 animate-flash-in">
-      ✗ CONCEDED
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold animate-flash-in"
+      style={{ background: 'rgba(244,63,94,0.12)', color: '#fb7185', border: '1px solid rgba(244,63,94,0.25)' }}>
+      <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+      Conceded
     </span>
   ) : isRebutted ? (
-    <span className="px-2 py-0.5 rounded text-xs font-black bg-green-900/60 text-green-400 border border-green-700 animate-flash-in">
-      ✓ REBUTTED
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold animate-flash-in"
+      style={{ background: 'rgba(52,211,153,0.10)', color: '#34d399', border: '1px solid rgba(52,211,153,0.22)' }}>
+      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+      Rebutted
     </span>
   ) : isActive ? (
-    <span className="px-2 py-0.5 rounded text-xs font-bold bg-blue-900/60 text-blue-300 border border-blue-800">
-      REBUTTING...
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold"
+      style={{ background: 'rgba(99,102,241,0.10)', color: '#818cf8', border: '1px solid rgba(99,102,241,0.22)' }}>
+      <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse-fast" />
+      Rebutting
     </span>
   ) : (
-    <span className="px-2 py-0.5 rounded text-xs font-bold text-gray-600 border border-gray-800">
-      PENDING
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold"
+      style={{ background: 'rgba(255,255,255,0.04)', color: '#52525b', border: '1px solid rgba(255,255,255,0.06)' }}>
+      Pending
     </span>
   );
 
+  const textColor = isConceded ? '#fda4af' : isRebutted ? '#6ee7b7' : isActive ? '#a5b4fc' : '#71717a';
+
   return (
-    <div className={`rounded-xl border ${borderClass} overflow-hidden transition-all duration-500`}>
+    <div
+      className="rounded-xl overflow-hidden transition-all duration-500"
+      style={{ border: `1px solid ${borderColor}`, background: bgColor }}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-gray-800/50">
-        <div className="flex items-center gap-2">
-          <span className="text-sm">{meta.icon}</span>
-          <span className="text-xs font-bold text-gray-300">
-            vs. {meta.name}
-          </span>
-        </div>
+      <div
+        className="flex items-center justify-between px-3.5 py-2.5"
+        style={{ borderBottom: `1px solid ${borderColor}` }}
+      >
+        <span className="text-xs font-semibold text-[#a1a1aa]">
+          vs. {meta.name}
+        </span>
         {resultBadge}
       </div>
 
-      {/* Rebuttal content */}
-      <div className="p-3 max-h-48 overflow-y-auto scrollbar-thin">
+      {/* Content */}
+      <div className="px-3.5 py-3 max-h-44 overflow-y-auto scrollbar-thin">
         {status === 'pending' ? (
-          <div className="text-gray-600 text-xs font-mono italic">Awaiting challenge outcome...</div>
+          <p className="text-[#3f3f46] text-xs italic">Awaiting challenge...</p>
         ) : (
           <div
-            className={`agent-content text-xs ${
-              isConceded ? 'text-red-300' : isRebutted ? 'text-green-300' : 'text-blue-300'
-            } ${isActive ? 'cursor-blink' : ''}`}
+            className={`agent-content ${isActive ? 'cursor-blink' : ''}`}
+            style={{ color: textColor }}
           >
             {content}
           </div>
