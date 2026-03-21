@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import AuthGate from './components/AuthGate.jsx';
 import DenialInput from './components/DenialInput.jsx';
@@ -296,8 +296,12 @@ export default function App() {
     if (anyRebutting && (activeTab === 'arguments' || activeTab === 'diagram')) setActiveTab('rebuttal');
   }, [rebuttals]);
 
+  const appealTabOpened = useRef(false);
   useEffect(() => {
-    if (appealLetter && activeTab !== 'appeal') setActiveTab('appeal');
+    if (appealLetter && !appealTabOpened.current) {
+      appealTabOpened.current = true;
+      setActiveTab('appeal');
+    }
   }, [appealLetter]);
 
   const handleEvent = useCallback((type, data) => {
@@ -389,6 +393,7 @@ export default function App() {
     setConcessionCount(0);
     setParsedDenial(null);
     setShowFlash(false);
+    appealTabOpened.current = false;
 
     try {
       const response = await fetch('/api/analyze', {

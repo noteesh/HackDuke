@@ -377,40 +377,92 @@ LEGAL AGENT: ${JSON.stringify(legalJSON ?? legalResult?.content)}`;
       let appealText = '';
 
       if (AGENTS.appeal) {
-        const concededOutputs = {};
-        if (concededAgents.includes('bias_auditor'))       concededOutputs.bias_auditor       = biasJSON       ?? biasResult?.content;
-        if (concededAgents.includes('precedent_agent'))    concededOutputs.precedent_agent    = precedentJSON  ?? precedentResult?.content;
-        if (concededAgents.includes('circumstance_agent')) concededOutputs.circumstance_agent = circumstanceJSON ?? circumstanceResult?.content;
-        if (concededAgents.includes('legal_agent'))        concededOutputs.legal_agent        = legalJSON      ?? legalResult?.content;
+        try {
+          const concededOutputs = {};
+          if (concededAgents.includes('bias_auditor'))       concededOutputs.bias_auditor       = biasJSON       ?? biasResult?.content;
+          if (concededAgents.includes('precedent_agent'))    concededOutputs.precedent_agent    = precedentJSON  ?? precedentResult?.content;
+          if (concededAgents.includes('circumstance_agent')) concededOutputs.circumstance_agent = circumstanceJSON ?? circumstanceResult?.content;
+          if (concededAgents.includes('legal_agent'))        concededOutputs.legal_agent        = legalJSON      ?? legalResult?.content;
 
-        const appealPrompt = `Write the appeal letter using only these arguments:
+          const appealPrompt = `Write the appeal letter using only these arguments:
 
 ORIGINAL DENIAL: ${parserJSON}
 OVERRIDE JUDGE OUTPUT: ${JSON.stringify(judgeJSON)}
 CONCEDED AGENT OUTPUTS: ${JSON.stringify(concededOutputs)}`;
 
-        const { content } = await invokeAgent(AGENTS.appeal, appealPrompt);
-        const appealJSON = tryParseJSON(content);
+          const { content } = await invokeAgent(AGENTS.appeal, appealPrompt);
+          const appealJSON = tryParseJSON(content);
 
-        if (appealJSON?.letter?.body) {
-          appealText = [
-            appealJSON.letter.date ?? '',
-            '',
-            `Re: ${appealJSON.letter.subject ?? 'Formal Appeal'}`,
-            '',
-            appealJSON.letter.body,
-            appealJSON.letter.cc?.length ? `\ncc: ${appealJSON.letter.cc.join(', ')}` : '',
-          ].filter(s => s !== undefined).join('\n');
-        } else {
-          appealText = content;
+          if (appealJSON?.letter?.body) {
+            appealText = [
+              appealJSON.letter.date ?? '',
+              '',
+              `Re: ${appealJSON.letter.subject ?? 'Formal Appeal'}`,
+              '',
+              appealJSON.letter.body,
+              appealJSON.letter.cc?.length ? `\ncc: ${appealJSON.letter.cc.join(', ')}` : '',
+            ].filter(s => s !== undefined).join('\n');
+          } else {
+            appealText = content;
+          }
+        } catch (appealErr) {
+          console.error('[analyze] Appeal agent error — using fallback:', appealErr.message);
         }
       }
 
-      if (appealText) {
-        for (const word of appealText.split(/(\s+)/)) {
-          send(res, 'appeal_chunk', { chunk: word });
-          await sleep(20);
+      // Fallback: generate a structured appeal letter from available data
+      if (!appealText) {
+        const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        const institution = parserOutput.institution ?? parserOutput.institution_name ?? 'The Institution';
+        const amount = parserOutput.amount ?? parserOutput.loan_amount ?? '';
+        const primaryReason = parserOutput.primary_reason ?? parserOutput.stated_reasons?.[0] ?? 'the stated reasons';
+
+        const concededSections = [];
+        if (concededAgents.includes('bias_auditor') && biasJSON) {
+          const arg = biasJSON.strongest_argument ?? biasJSON.risk_summary ?? 'The denial reflects discriminatory patterns that violate the Equal Credit Opportunity Act.';
+          concededSections.push(`Discrimination Concern: ${arg}`);
         }
+        if (concededAgents.includes('precedent_agent') && precedentJSON) {
+          const arg = precedentJSON.strongest_precedent ?? precedentJSON.precedent_summary ?? 'Established precedent supports reconsideration of this denial.';
+          concededSections.push(`Legal Precedent: ${arg}`);
+        }
+        if (concededAgents.includes('circumstance_agent') && circumstanceJSON) {
+          const arg = circumstanceJSON.strongest_argument ?? circumstanceJSON.circumstance_summary ?? 'My individual circumstances were not adequately considered in the automated review.';
+          concededSections.push(`Mitigating Circumstances: ${arg}`);
+        }
+        if (concededAgents.includes('legal_agent') && legalJSON) {
+          const arg = legalJSON.strongest_violation ?? legalJSON.legal_summary ?? 'This denial appears to violate applicable consumer protection statutes.';
+          concededSections.push(`Legal Violation: ${arg}`);
+        }
+
+        const bodyParagraphs = [
+          `I am writing to formally appeal the recent denial of my application${amount ? ` for ${amount}` : ''}. Your records will reflect this denial was issued on the basis of ${primaryReason}.`,
+          '',
+          `An independent adversarial review of this denial identified ${concededAgents.length} argument${concededAgents.length !== 1 ? 's' : ''} that your institution's own defense could not rebut:`,
+          '',
+          ...concededSections.map((s, i) => `${i + 1}. ${s}`),
+          '',
+          `Given that the defense conceded ${concededAgents.length} of 4 challenges, I respectfully request a full human review of my application. I am prepared to provide any supplemental documentation that would support reconsideration.`,
+          '',
+          `I request a written response within 30 days as provided under applicable consumer protection law.`,
+          '',
+          `Respectfully,`,
+          `[Applicant Signature]`,
+        ];
+
+        appealText = [
+          today,
+          '',
+          `To: ${institution}`,
+          `Re: Formal Appeal of Application Denial`,
+          '',
+          ...bodyParagraphs,
+        ].join('\n');
+      }
+
+      for (const word of appealText.split(/(\s+)/)) {
+        send(res, 'appeal_chunk', { chunk: word });
+        await sleep(20);
       }
     }
 
