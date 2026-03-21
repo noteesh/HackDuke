@@ -1,7 +1,9 @@
 import { useState, useCallback } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
+import AuthGate from './components/AuthGate.jsx';
 import DenialInput from './components/DenialInput.jsx';
 import AgentCard from './components/AgentCard.jsx';
-import RebuttalCard from './components/RebuttalCard.jsx';
+import RebuttalCard from './components/RebuttalCard.jsx'; 
 import OverrideFlash from './components/OverrideFlash.jsx';
 import AppealLetter from './components/AppealLetter.jsx';
 
@@ -34,6 +36,7 @@ const INITIAL_REBUTTALS = {
 };
 
 export default function App() {
+  const { user, logout } = useAuth0();
   const [phase, setPhase] = useState('input'); // input | processing | complete
   const [denialText, setDenialText] = useState(SAMPLE_DENIAL);
   const [parsedDenial, setParsedDenial] = useState(null);
@@ -193,17 +196,20 @@ export default function App() {
   // ── Input phase ──────────────────────────────────────────────────────────────
   if (phase === 'input') {
     return (
-      <DenialInput
-        denialText={denialText}
-        onTextChange={setDenialText}
-        onSubmit={startAnalysis}
-      />
+      <AuthGate>
+        <DenialInput
+          denialText={denialText}
+          onTextChange={setDenialText}
+          onSubmit={startAnalysis}
+        />
+      </AuthGate>
     );
   }
 
   // ── Analysis / complete phase ────────────────────────────────────────────────
   return (
-    <div className="h-screen bg-gray-950 text-gray-100 flex flex-col overflow-hidden">
+    <AuthGate>
+      <div className="h-screen bg-gray-950 text-gray-100 flex flex-col overflow-hidden">
       {showFlash && <OverrideFlash />}
 
       {/* ── Top bar ── */}
@@ -221,6 +227,19 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* User info */}
+          {user && (
+            <div className="text-xs text-gray-500 hidden sm:flex items-center gap-2">
+              <span>{user.name}</span>
+              <button
+                onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+                className="text-gray-600 hover:text-gray-400 transition-colors"
+              >
+                Log Out
+              </button>
+            </div>
+          )}
+
           {/* Phase indicator */}
           {phase === 'processing' && !overrideResult && (
             <div className="flex items-center gap-2 text-xs text-amber-400 font-mono">
@@ -370,6 +389,7 @@ export default function App() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </AuthGate>
   );
 }
