@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const { Resend } = require('resend');
 const { parseDenialLetter } = require('./mockData');
 const { invokeAgent } = require('./orchestrateClient');
 
@@ -424,6 +425,107 @@ CONCEDED AGENT OUTPUTS: ${JSON.stringify(concededOutputs)}`;
     console.error('[analyze] Error:', err);
     send(res, 'error', { message: err.message });
     res.end();
+  }
+});
+
+// ── Email Sending Endpoint ───────────────────────────────────────────────────
+
+app.post('/api/send-appeal', async (req, res) => {
+  try {
+    const { recipientEmail, recipientName, subject, appealText, userEmail } = req.body;
+
+    // Validation
+    if (!recipientEmail || !recipientEmail.includes('@')) {
+      return res.status(400).json({ error: 'Valid recipient email is required' });
+    }
+
+    if (!appealText || appealText.trim().length === 0) {
+      return res.status(400).json({ error: 'Appeal text is required' });
+    }
+
+    // Email configuration
+    const resendApiKey = process.env.RESEND_API_KEY;
+    const fromEmail = process.env.MAIL_FROM || 'onboarding@resend.dev';
+    const appName = process.env.APP_NAME || 'The Override';
+    const defaultSubject = 'Formal Appeal Regarding Denial Decision';
+
+    // Construct email body with intro
+    const emailBody = `Dear ${recipientName || 'Legal Counsel'},
+
+I am writing to formally appeal a recent denial decision. Please find the complete appeal letter below.
+
+────────────────────────────────────────────────────────────────────────────
+
+${appealText}
+
+────────────────────────────────────────────────────────────────────────────
+
+This appeal was prepared with the assistance of ${appName}, an AI-powered legal analysis tool.
+
+Best regards`;
+
+    // Check if Resend is configured
+    if (!resendApiKey) {
+      console.log('[send-appeal] RESEND_API_KEY not configured. Email details:');
+      console.log('  From:', fromEmail);
+      console.log('  To:', recipientEmail);
+      console.log('  Reply-To:', userEmail || 'Not provided');
+      console.log('  Subject:', subject || defaultSubject);
+      console.log('  Body length:', emailBody.length, 'characters');
+      console.log('\n--- Email Preview ---');
+      console.log(emailBody.substring(0, 500) + '...\n');
+
+      return res.status(400).json({ 
+        error: 'Email service not configured',
+        message: 'RESEND_API_KEY is required in .env file'
+      });
+    }
+
+    // Initialize Resend client
+    const resend = new Resend(resendApiKey);
+
+    // Send email using Resend SDK
+    try {
+      const emailData = {
+        from: fromEmail,
+        to: recipientEmail,
+        subject: subject || defaultSubject,
+        text: emailBody,
+      };
+
+      // Add reply-to if user email is available
+      if (userEmail) {
+        emailData.reply_to = userEmail;
+      }
+
+      const { data, error } = await resend.emails.send(emailData);
+
+      if (error) {
+        console.error('[send-appeal] Resend error:', error);
+        return res.status(500).json({ 
+          error: 'Failed to send email',
+          details: error.message || 'Unknown error from Resend'
+        });
+      }
+
+      console.log('[send-appeal] Email sent successfully via Resend:', data.id);
+      return res.json({ 
+        success: true, 
+        message: 'Appeal sent successfully to ' + recipientEmail,
+        emailId: data.id 
+      });
+
+    } catch (emailError) {
+      console.error('[send-appeal] Resend SDK error:', emailError);
+      return res.status(500).json({ 
+        error: 'Failed to send email',
+        details: emailError.message 
+      });
+    }
+
+  } catch (err) {
+    console.error('[send-appeal] Error:', err);
+    res.status(500).json({ error: 'Internal server error', details: err.message });
   }
 });
 
