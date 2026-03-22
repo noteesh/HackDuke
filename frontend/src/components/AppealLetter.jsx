@@ -38,7 +38,8 @@ export default function AppealLetter({ text, streaming }) {
     setSendStatus(null);
 
     try {
-      const response = await fetch('/api/send-appeal', {
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${apiUrl}/api/send-appeal`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
