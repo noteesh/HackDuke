@@ -352,9 +352,9 @@ function DebateThread({ agentId, agentRounds, rebuttalRounds }) {
   const snippet = firstAttack.split('\n').find(l => l.trim()) ?? '';
 
   const borderColor = finalVerdict === 'CONCEDED'
-    ? 'rgba(244,63,94,0.22)'
-    : finalVerdict === 'REBUTTED'
     ? 'rgba(52,211,153,0.16)'
+    : finalVerdict === 'REBUTTED'
+    ? 'rgba(244,63,94,0.22)'
     : isLive ? 'rgba(99,102,241,0.2)'
     : 'rgba(255,255,255,0.07)';
 
@@ -375,8 +375,8 @@ function DebateThread({ agentId, agentRounds, rebuttalRounds }) {
               const v = rr[agentId]?.result;
               return (
                 <span key={round} className="text-[9px] font-bold px-1.5 py-0.5 rounded"
-                  style={v === 'CONCEDED' ? { background: 'rgba(244,63,94,0.15)', color: '#fb7185' }
-                    : v === 'REBUTTED' ? { background: 'rgba(52,211,153,0.12)', color: '#34d399' }
+                  style={v === 'CONCEDED' ? { background: 'rgba(244,63,94,0.15)', color: '#34d399' }
+                    : v === 'REBUTTED' ? { background: 'rgba(52,211,153,0.12)', color: '#fb7185' }
                     : { background: 'rgba(255,255,255,0.07)', color: '#52525b' }}>
                   R{round}
                 </span>
@@ -389,8 +389,8 @@ function DebateThread({ agentId, agentRounds, rebuttalRounds }) {
           {finalVerdict ? (
             <span className="text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0"
               style={finalVerdict === 'CONCEDED'
-                ? { background: 'rgba(244,63,94,0.12)', color: '#fb7185', border: '1px solid rgba(244,63,94,0.25)' }
-                : { background: 'rgba(52,211,153,0.10)', color: '#34d399', border: '1px solid rgba(52,211,153,0.2)' }}>
+                ? { background: 'rgba(244,63,94,0.12)', color: '#34d399', border: '1px solid rgba(52,211,153,0.2)'}
+                : { background: 'rgba(52,211,153,0.10)', color: '#fb7185', border: '1px solid rgba(244,63,94,0.25)' }}>
               {finalVerdict === 'CONCEDED' ? '✗ Conceded' : '✓ Rebutted'}
             </span>
           ) : isLive ? (
