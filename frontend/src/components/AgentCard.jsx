@@ -80,15 +80,15 @@ function strengthColor(label) {
 function StatusBadge({ status, rebuttalResult }) {
   if (rebuttalResult === 'CONCEDED') return (
     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold"
-      style={{ background: 'rgba(244,63,94,0.12)', color: '#fb7185', border: '1px solid rgba(244,63,94,0.25)' }}>
-      <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+      style={{ background: 'rgba(52,211,153,0.10)', color: '#34d399', border: '1px solid rgba(52,211,153,0.22)' }}>
+      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
       Conceded
     </span>
   );
   if (rebuttalResult === 'REBUTTED') return (
     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold"
-      style={{ background: 'rgba(52,211,153,0.10)', color: '#34d399', border: '1px solid rgba(52,211,153,0.22)' }}>
-      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+      style={{ background: 'rgba(244,63,94,0.12)', color: '#fb7185', border: '1px solid rgba(244,63,94,0.25)' }}>
+      <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
       Rebutted
     </span>
   );
@@ -124,12 +124,12 @@ export default function AgentCard({ agentId, state }) {
   const isConceded = rebuttalResult === 'CONCEDED';
   const isRebutted = rebuttalResult === 'REBUTTED';
 
-  const borderColor = isConceded ? 'rgba(244,63,94,0.28)'
-    : isRebutted ? 'rgba(52,211,153,0.2)'
+  const borderColor = isConceded ? 'rgba(52,211,153,0.2)'
+    : isRebutted ? 'rgba(244,63,94,0.28)'
     : meta.accentBorder;
 
-  const bgColor = isConceded ? 'rgba(244,63,94,0.05)'
-    : isRebutted ? 'rgba(52,211,153,0.04)'
+  const bgColor = isConceded ? 'rgba(52,211,153,0.04)'
+    : isRebutted ? 'rgba(244,63,94,0.05)'
     : '#111113';
 
   const badge = getStrengthBadge(agentId, data);
@@ -145,14 +145,14 @@ export default function AgentCard({ agentId, state }) {
         className="px-4 py-3"
         style={{
           borderBottom: `1px solid ${borderColor}`,
-          background: isConceded ? 'rgba(244,63,94,0.06)' : isRebutted ? 'rgba(52,211,153,0.04)' : meta.accentBg,
+          background: isConceded ? 'rgba(52,211,153,0.04)' : isRebutted ? 'rgba(244,63,94,0.06)' : meta.accentBg,
         }}
       >
         {/* Top row: name + badges */}
         <div className="flex items-center justify-between mb-1.5">
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-              style={{ background: isConceded ? '#fb7185' : isRebutted ? '#34d399' : meta.dotColor }} />
+              style={{ background: isConceded ? '#34d399' : isRebutted ? '#fb7185' : meta.dotColor }} />
             <span className="text-sm font-semibold text-white">{meta.name}</span>
             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide"
               style={{ color: meta.accentColor, background: `${meta.accentColor}14` }}>
@@ -182,7 +182,7 @@ export default function AgentCard({ agentId, state }) {
         ) : (
           <div
             className={`agent-content text-xs leading-relaxed ${status === 'arguing' ? 'cursor-blink' : ''}`}
-            style={{ color: isConceded ? '#fda4af' : isRebutted ? '#6ee7b7' : '#a1a1aa', whiteSpace: 'pre-wrap' }}
+            style={{ color: isConceded ? '#6ee7b7' : isRebutted ? '#fda4af' : '#a1a1aa', whiteSpace: 'pre-wrap' }}
           >
             {content}
           </div>

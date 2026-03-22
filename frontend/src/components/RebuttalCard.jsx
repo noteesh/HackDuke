@@ -16,31 +16,31 @@ export default function RebuttalCard({ agentId, state }) {
   const isRebutted = status === 'rebutted' || result === 'REBUTTED';
 
   const borderColor = isConceded
-    ? 'rgba(244,63,94,0.28)'
-    : isRebutted
     ? 'rgba(52,211,153,0.2)'
+    : isRebutted
+    ? 'rgba(244,63,94,0.28)'
     : isActive
     ? 'rgba(99,102,241,0.22)'
     : 'rgba(255,255,255,0.07)';
 
   const bgColor = isConceded
-    ? 'rgba(244,63,94,0.05)'
-    : isRebutted
     ? 'rgba(52,211,153,0.04)'
+    : isRebutted
+    ? 'rgba(244,63,94,0.05)'
     : isActive
     ? 'rgba(99,102,241,0.04)'
     : '#111113';
 
   const resultBadge = isConceded ? (
     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold animate-flash-in"
-      style={{ background: 'rgba(244,63,94,0.12)', color: '#fb7185', border: '1px solid rgba(244,63,94,0.25)' }}>
-      <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+      style={{ background: 'rgba(52,211,153,0.10)', color: '#34d399', border: '1px solid rgba(52,211,153,0.22)' }}>
+      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
       Conceded
     </span>
   ) : isRebutted ? (
     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold animate-flash-in"
-      style={{ background: 'rgba(52,211,153,0.10)', color: '#34d399', border: '1px solid rgba(52,211,153,0.22)' }}>
-      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+      style={{ background: 'rgba(244,63,94,0.12)', color: '#fb7185', border: '1px solid rgba(244,63,94,0.25)' }}>
+      <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
       Rebutted
     </span>
   ) : isActive ? (
@@ -56,7 +56,7 @@ export default function RebuttalCard({ agentId, state }) {
     </span>
   );
 
-  const textColor = isConceded ? '#fda4af' : isRebutted ? '#6ee7b7' : isActive ? '#a5b4fc' : '#71717a';
+  const textColor = isConceded ? '#6ee7b7' : isRebutted ? '#fda4af' : isActive ? '#a5b4fc' : '#71717a';
 
   return (
     <div
