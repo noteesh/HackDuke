@@ -10,23 +10,23 @@ function audioUrl(baseUrl, text) {
 }
 
 export default async function handler(req, res) {
-  const { lines: encoded, turn = '0' } = req.query;
-  const currentTurn = parseInt(turn);
+  const params      = { ...req.query, ...req.body };
+  const encoded     = params.lines;
+  const currentTurn = parseInt(params.turn ?? '0');
   const baseUrl     = process.env.VITE_API_URL;
   const twiml       = new twilio.twiml.VoiceResponse();
 
   if (!encoded) {
     twiml.say('Goodbye.');
     twiml.hangup();
-    return res.status(200).type('text/xml').send(twiml.toString());
+    res.setHeader('Content-Type', 'text/xml');
+    return res.status(200).send(twiml.toString());
   }
 
   const lines = decodeLines(encoded);
 
-  // Play current line via ElevenLabs audio endpoint
   twiml.play(audioUrl(baseUrl, lines[currentTurn]));
 
-  // Gather user response
   twiml.gather({
     input:         'speech',
     action:        `${baseUrl}/api/call/webhook/gather?lines=${encoded}&turn=${currentTurn}`,
@@ -37,5 +37,6 @@ export default async function handler(req, res) {
 
   twiml.redirect(`${baseUrl}/api/call/webhook/gather?lines=${encoded}&turn=${currentTurn}`);
 
-  return res.status(200).type('text/xml').send(twiml.toString());
+  res.setHeader('Content-Type', 'text/xml');
+  return res.status(200).send(twiml.toString());
 }
