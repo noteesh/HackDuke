@@ -191,7 +191,6 @@ function DetailOverlay({ agentId, state, svgX, svgY, svgWidth, svgHeight, onClos
         border: `1px solid ${borderCol}`,
         borderRadius: 12,
         boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
-        animation: 'fadeScaleIn 0.15s ease-out',
       }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -252,10 +251,6 @@ export default function AgentDebateGraph({ agents }) {
   return (
     <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#0a0a0b' }}>
       <style>{`
-        @keyframes fadeScaleIn {
-          from { opacity: 0; transform: scale(0.95) translateY(4px); }
-          to   { opacity: 1; transform: scale(1) translateY(0); }
-        }
         @keyframes pulseRing {
           0%, 100% { opacity: 0.6; transform: scale(1); }
           50%       { opacity: 0.15; transform: scale(1.18); }
@@ -271,19 +266,9 @@ export default function AgentDebateGraph({ agents }) {
           50% { transform: translateY(-10px) translateX(-15px); opacity: 0.5; }
           75% { transform: translateY(-25px) translateX(5px); opacity: 0.7; }
         }
-        @keyframes particleFloat {
-          0% { transform: translateY(0px) translateX(0px); opacity: 0; }
-          10% { opacity: 0.8; }
-          90% { opacity: 0.8; }
-          100% { transform: translateY(-100vh) translateX(var(--drift)); opacity: 0; }
-        }
         @keyframes meshPulse {
           0%, 100% { opacity: 0.03; }
           50% { opacity: 0.08; }
-        }
-        @keyframes scanline {
-          0% { transform: translateY(-100%); }
-          100% { transform: translateY(100vh); }
         }
       `}</style>
       
@@ -324,28 +309,35 @@ export default function AgentDebateGraph({ agents }) {
         
         {/* Particle System */}
         {[...Array(25)].map((_, i) => {
-          const drift = `${(Math.random() - 0.5) * 100}px`;
+          const leftPos = Math.random() * 100;
+          const size = 2 + Math.random() * 3;
+          const duration = 15 + Math.random() * 20;
+          const delay = Math.random() * 10;
+          const drift = (Math.random() - 0.5) * 100;
+          const particleId = `particle-${i}-${Math.random().toString(36).substr(2, 9)}`;
+          
           return (
-            <div key={`particle-${i}`} style={{
-              position: 'absolute',
-              left: `${Math.random() * 100}%`,
-              bottom: '-10px',
-              width: `${2 + Math.random() * 3}px`,
-              height: `${2 + Math.random() * 3}px`,
-              borderRadius: '50%',
-              background: i % 4 === 0 ? '#818cf8' : i % 4 === 1 ? '#fbbf24' : i % 4 === 2 ? '#34d399' : '#fb7185',
-              boxShadow: `0 0 ${4 + Math.random() * 6}px currentColor`,
-              animation: `particleFloat ${15 + Math.random() * 20}s linear infinite`,
-              animationDelay: `${Math.random() * 10}s`,
-            }}>
+            <div key={`particle-${i}`}>
               <style>{`
-                @keyframes particleFloat {
+                @keyframes ${particleId} {
                   0% { transform: translateY(0px) translateX(0px); opacity: 0; }
                   10% { opacity: 0.8; }
                   90% { opacity: 0.8; }
-                  100% { transform: translateY(-100vh) translateX(${drift}); opacity: 0; }
+                  100% { transform: translateY(-100vh) translateX(${drift}px); opacity: 0; }
                 }
               `}</style>
+              <div style={{
+                position: 'absolute',
+                left: `${leftPos}%`,
+                bottom: '-10px',
+                width: `${size}px`,
+                height: `${size}px`,
+                borderRadius: '50%',
+                background: i % 4 === 0 ? '#818cf8' : i % 4 === 1 ? '#fbbf24' : i % 4 === 2 ? '#34d399' : '#fb7185',
+                boxShadow: `0 0 ${4 + Math.random() * 6}px currentColor`,
+                animation: `${particleId} ${duration}s linear infinite`,
+                animationDelay: `${delay}s`,
+              }} />
             </div>
           );
         })}
@@ -362,16 +354,6 @@ export default function AgentDebateGraph({ agents }) {
           animation: 'meshPulse 8s ease-in-out infinite',
         }} />
         
-        {/* Scanline Effect */}
-        <div style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          height: '2px',
-          background: 'linear-gradient(to bottom, transparent, rgba(99,102,241,0.4), transparent)',
-          animation: 'scanline 8s linear infinite',
-          filter: 'blur(1px)',
-        }} />
         
         {/* Vignette */}
         <div style={{
