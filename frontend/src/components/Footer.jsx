@@ -10,7 +10,7 @@ export default function Footer({ onShowImpact }) {
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
           </svg>
         </div>
-        <span className="text-[11px] font-semibold text-[#3f3f46]">The Override</span>
+        <span className="text-[11px] font-semibold text-[#3f3f46]">VerdictX</span>
         <span className="text-[#27272a] text-[11px]">·</span>
         <span className="text-[11px] text-[#27272a]">HackDuke 2026</span>
       </div>

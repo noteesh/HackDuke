@@ -625,7 +625,7 @@ function RebuttalTab({ rebuttalRounds, rebuttals, agentRounds, overrideResult, p
               Not enough evidence to make a case
             </p>
             <p className="text-sm text-[#71717a] leading-relaxed mb-5 max-w-sm mx-auto">
-              The Override requires at least 2 conceded arguments to generate a formal appeal.
+              VerdictX requires at least 2 conceded arguments to generate a formal appeal.
               The institution's defense held on{' '}
               <span className="text-[#a1a1aa] font-medium">{4 - overrideResult.concessions} of 4</span> challenges
               — not enough to override.

@@ -245,7 +245,7 @@ function LoginScreen({ onLogin, onShowImpact }) {
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
             </svg>
           </div>
-          <span className="text-white font-bold text-xl tracking-tight">The Override</span>
+          <span className="text-white font-bold text-xl tracking-tight">VerdictX</span>
         </div>
 
         {/* Middle section: hero copy LEFT + wireframe RIGHT */}
@@ -309,7 +309,7 @@ function LoginScreen({ onLogin, onShowImpact }) {
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
               </svg>
             </div>
-            <span className="text-white font-semibold text-sm">The Override</span>
+            <span className="text-white font-semibold text-sm">VerdictX</span>
           </div>
 
           <h2 className="text-xl font-semibold text-white mb-1">Sign in</h2>

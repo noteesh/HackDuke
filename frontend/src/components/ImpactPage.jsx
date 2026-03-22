@@ -178,7 +178,7 @@ export default function ImpactPage({ onBack }) {
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
               </svg>
             </div>
-            <span className="text-sm font-semibold text-white">The Override</span>
+            <span className="text-sm font-semibold text-white">VerdictX</span>
             <span className="text-[#3f3f46] text-xs hidden sm:block">/ why this matters</span>
           </div>
         </div>
@@ -248,7 +248,7 @@ export default function ImpactPage({ onBack }) {
           >
             <p className="text-white font-semibold mb-1">You were denied. The algorithm won't explain itself.</p>
             <p className="text-sm text-[#71717a] mb-4 max-w-xl mx-auto">
-              The Override uses AI to fight AI — analyzing your denial for bias, legal violations, and precedents,
+              VerdictX uses AI to fight AI — analyzing your denial for bias, legal violations, and precedents,
               then generating a formal appeal letter if the defense can't hold.
             </p>
             <button
@@ -258,7 +258,7 @@ export default function ImpactPage({ onBack }) {
               onMouseEnter={e => e.currentTarget.style.background = 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)'}
               onMouseLeave={e => e.currentTarget.style.background = 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)'}
             >
-              Try The Override →
+              Try VerdictX →
             </button>
           </div>
 
