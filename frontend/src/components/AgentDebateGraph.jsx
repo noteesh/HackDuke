@@ -155,16 +155,16 @@ function DetailOverlay({ agentId, state, svgX, svgY, svgWidth, svgHeight, onClos
   const xPct = svgX / svgWidth;
   const yPct = svgY / svgHeight;
 
-  // Overlay is 280px wide. Position to the right of node if room, else left.
-  const overlayWidth = 280;
+  // Overlay is 320px wide. Position to the side of node.
+  const overlayWidth = 320;
   const overlayStyle = {
     position: 'absolute',
     width: overlayWidth,
     zIndex: 20,
-    top: `${Math.max(4, Math.min(yPct * 100 - 10, 70))}%`,
-    ...(xPct > 0.55
-      ? { right: `${Math.max(2, (1 - xPct) * 100 + 8)}%` }
-      : { left: `${Math.max(2, xPct * 100 + 8)}%` }),
+    top: `${Math.max(4, Math.min(yPct * 100 - 15, 65))}%`,
+    ...(xPct > 0.5
+      ? { right: `${Math.max(4, (1 - xPct) * 100 + 18)}%` }
+      : { left: `${Math.max(4, xPct * 100 + 18)}%` }),
   };
 
   const handleMouseLeave = useCallback(() => {
@@ -240,14 +240,6 @@ export default function AgentDebateGraph({ agents }) {
   const handleNodeClick = useCallback((agentId) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     setActiveAgent(prev => prev === agentId ? null : agentId);
-  }, []);
-
-  const handleNodeMouseLeave = useCallback(() => {
-    closeTimer.current = setTimeout(() => setActiveAgent(null), 1500);
-  }, []);
-
-  const handleNodeMouseEnter = useCallback(() => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
   }, []);
 
   const handleOverlayClose = useCallback(() => setActiveAgent(null), []);
@@ -343,8 +335,6 @@ export default function AgentDebateGraph({ agents }) {
               key="denial_defender"
               style={{ cursor: 'pointer' }}
               onClick={() => handleNodeClick('denial_defender')}
-              onMouseEnter={handleNodeMouseEnter}
-              onMouseLeave={handleNodeMouseLeave}
             >
               {/* Pulse ring when arguing */}
               {isArguing && (
@@ -412,8 +402,6 @@ export default function AgentDebateGraph({ agents }) {
               key={id}
               style={{ cursor: 'pointer' }}
               onClick={() => handleNodeClick(id)}
-              onMouseEnter={handleNodeMouseEnter}
-              onMouseLeave={handleNodeMouseLeave}
             >
               {/* Pulse ring when arguing */}
               {isArguing && (
