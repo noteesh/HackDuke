@@ -2,8 +2,11 @@
   "name": "the-override-server",
   "version": "1.0.0",
   "scripts": {
-    "dev": "node --watch index.js",
-    "start": "node index.js"
+    "start": "cd backend && node index.js",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd frontend && npm run dev",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
   },
   "dependencies": {
     "cors": "^2.8.5",
