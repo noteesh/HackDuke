@@ -54,19 +54,21 @@ export default function AppealLetter({ text, streaming }) {
       if (response.ok) {
         setSendStatus({ 
           type: 'success', 
-          message: data.demo 
-            ? 'Appeal prepared successfully (email provider not configured - check server logs)'
-            : 'Appeal sent successfully to ' + recipientEmail 
+          message: data.message || 'Appeal sent successfully to ' + recipientEmail 
         });
         setRecipientEmail('');
         setRecipientName('');
       } else {
+        // Display the actual backend error message
+        const errorMessage = data.message || data.error || data.details || 'Failed to send appeal';
+        console.error('[AppealLetter] Backend error:', data);
         setSendStatus({ 
           type: 'error', 
-          message: data.error || 'Failed to send appeal' 
+          message: errorMessage
         });
       }
     } catch (err) {
+      console.error('[AppealLetter] Network error:', err);
       setSendStatus({ 
         type: 'error', 
         message: 'Network error: ' + err.message 
