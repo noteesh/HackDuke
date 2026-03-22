@@ -43,14 +43,13 @@ const AGENT_META = {
   },
 };
 
-// Pentagon positions as % of SVG viewport (500x420)
-// Defender top-center, challengers at 4 corners in a wide arc
+// X-shape positions: Defender center, challengers at 4 corners
 const NODE_POSITIONS = {
-  denial_defender:   { x: 250, y: 60  },
-  bias_auditor:      { x: 80,  y: 200 },
-  precedent_agent:   { x: 420, y: 200 },
-  circumstance_agent:{ x: 120, y: 360 },
-  legal_agent:       { x: 380, y: 360 },
+  denial_defender:   { x: 250, y: 210 },
+  bias_auditor:      { x: 80,  y: 80  },
+  precedent_agent:   { x: 420, y: 80  },
+  circumstance_agent:{ x: 80,  y: 340 },
+  legal_agent:       { x: 420, y: 340 },
 };
 
 const CHALLENGER_IDS = ['bias_auditor', 'precedent_agent', 'circumstance_agent', 'legal_agent'];
@@ -58,6 +57,28 @@ const CHALLENGER_IDS = ['bias_auditor', 'precedent_agent', 'circumstance_agent',
 // Box half-dimensions for hit-testing
 const BOX_W = 100;
 const BOX_H = 48;
+
+// Calculate edge intersection point for line from center to box
+function getBoxEdgePoint(fromX, fromY, toX, toY) {
+  const dx = toX - fromX;
+  const dy = toY - fromY;
+  const angle = Math.atan2(dy, dx);
+  
+  // Calculate intersection with box edges
+  const halfW = BOX_W / 2;
+  const halfH = BOX_H / 2;
+  
+  // Check which edge the line intersects
+  const tx = Math.abs(dx) > 0.001 ? halfW / Math.abs(Math.cos(angle)) : Infinity;
+  const ty = Math.abs(dy) > 0.001 ? halfH / Math.abs(Math.sin(angle)) : Infinity;
+  
+  const t = Math.min(tx, ty);
+  
+  return {
+    x: toX - Math.cos(angle) * t,
+    y: toY - Math.sin(angle) * t
+  };
+}
 
 function getLineColor(rebuttalResult, status) {
   if (rebuttalResult === 'CONCEDED') return { stroke: '#fb7185', glow: 'rgba(251,113,133,0.5)' };
@@ -273,12 +294,17 @@ export default function AgentDebateGraph({ agents }) {
           const state = agents[id] || {};
           const { stroke, glow } = getLineColor(state.rebuttalResult, state.status);
           const isActive = state.status === 'arguing' || state.status === 'done' || state.rebuttalResult;
+          
+          // Calculate edge points for both boxes
+          const defenderEdge = getBoxEdgePoint(pos.x, pos.y, defPos.x, defPos.y);
+          const challengerEdge = getBoxEdgePoint(defPos.x, defPos.y, pos.x, pos.y);
+          
           return (
             <g key={id}>
               {/* Glow line behind */}
               <line
-                x1={defPos.x} y1={defPos.y}
-                x2={pos.x} y2={pos.y}
+                x1={defenderEdge.x} y1={defenderEdge.y}
+                x2={challengerEdge.x} y2={challengerEdge.y}
                 stroke={glow}
                 strokeWidth="4"
                 filter="url(#lineGlow)"
@@ -287,8 +313,8 @@ export default function AgentDebateGraph({ agents }) {
               />
               {/* Main line */}
               <line
-                x1={defPos.x} y1={defPos.y}
-                x2={pos.x} y2={pos.y}
+                x1={defenderEdge.x} y1={defenderEdge.y}
+                x2={challengerEdge.x} y2={challengerEdge.y}
                 stroke={stroke}
                 strokeWidth="1.5"
                 strokeDasharray={isActive ? 'none' : '5 5'}
@@ -297,9 +323,9 @@ export default function AgentDebateGraph({ agents }) {
               {/* Traveling dots along the line */}
               {isActive && (
                 <>
-                  <LineDot x1={defPos.x} y1={defPos.y} x2={pos.x} y2={pos.y} color={stroke} delay={0} duration={2.2} />
-                  <LineDot x1={defPos.x} y1={defPos.y} x2={pos.x} y2={pos.y} color={stroke} delay={0.8} duration={2.2} />
-                  <LineDot x1={pos.x} y1={pos.y} x2={defPos.x} y2={defPos.y} color={stroke} delay={0.4} duration={2.2} />
+                  <LineDot x1={defenderEdge.x} y1={defenderEdge.y} x2={challengerEdge.x} y2={challengerEdge.y} color={stroke} delay={0} duration={2.2} />
+                  <LineDot x1={defenderEdge.x} y1={defenderEdge.y} x2={challengerEdge.x} y2={challengerEdge.y} color={stroke} delay={0.8} duration={2.2} />
+                  <LineDot x1={challengerEdge.x} y1={challengerEdge.y} x2={defenderEdge.x} y2={defenderEdge.y} color={stroke} delay={0.4} duration={2.2} />
                 </>
               )}
             </g>
