@@ -16,12 +16,62 @@ function downloadAsPDF() {
   window.print();
 }
 
-export default function AppealLetter({ text, streaming }) {
+function buildSummaryPreview(parsedDenial, agents, rebuttals, overrideResult) {
+  if (!parsedDenial && !agents && !overrideResult) return null;
+  
+  const sections = [];
+  const concededAgents = overrideResult?.concededAgents || [];
+  
+  sections.push('═══════════════════════════════════════════════════════════════');
+  sections.push('AI COURTROOM SUMMARY — VerdictX Adversarial Analysis');
+  sections.push('═══════════════════════════════════════════════════════════════');
+  sections.push('');
+  
+  if (parsedDenial) {
+    sections.push('CASE OVERVIEW');
+    sections.push(`Institution: ${parsedDenial.institution_name || parsedDenial.institution || 'Not specified'}`);
+    sections.push(`Denial Type: ${parsedDenial.denial_type || parsedDenial.application_type || 'Not specified'}`);
+    sections.push('');
+  }
+  
+  sections.push('AGENT ARGUMENTS');
+  const agentNames = {
+    bias_auditor: 'Bias Auditor',
+    precedent_agent: 'Precedent Agent',
+    circumstance_agent: 'Circumstance Agent',
+    legal_agent: 'Legal Agent',
+  };
+  
+  Object.entries(agentNames).forEach(([id, name]) => {
+    const wasConceded = concededAgents.includes(id);
+    sections.push(`${name}: ${wasConceded ? '✗ CONCEDED' : '✓ Rebutted'}`);
+  });
+  sections.push('');
+  
+  sections.push('FINAL OUTCOME');
+  const triggered = overrideResult?.triggered;
+  const concessionCount = overrideResult?.concessions || 0;
+  
+  if (triggered) {
+    sections.push(`✓ VerdictX ACTIVATED — ${concessionCount} of 4 challenges conceded`);
+  } else {
+    sections.push(`✗ VerdictX did not activate — ${concessionCount} of 4 challenges conceded`);
+  }
+  
+  sections.push('');
+  sections.push('[Full detailed summary will be attached as a professional PDF document]');
+  sections.push('[Filename: AI_Courtroom_Analysis.pdf]');
+  
+  return sections.join('\n');
+}
+
+export default function AppealLetter({ text, streaming, parsedDenial, agents, rebuttals, overrideResult }) {
   const { user } = useAuth0();
   const [recipientEmail, setRecipientEmail]   = useState('');
   const [recipientName, setRecipientName]     = useState('');
   const [sending, setSending]                 = useState(false);
   const [sendStatus, setSendStatus]           = useState(null);
+  const [showSummaryPreview, setShowSummaryPreview] = useState(false);
 
   // Call Lawyer state
   const [showCallModal, setShowCallModal]     = useState(false);
@@ -49,6 +99,13 @@ export default function AppealLetter({ text, streaming }) {
           recipientName:  recipientName.trim(),
           appealText:     text,
           userEmail:      user?.email || null,
+          courtroomData:  {
+            parsedDenial,
+            agents,
+            rebuttals,
+            overrideResult,
+            concededAgents: overrideResult?.concededAgents || []
+          },
         }),
       });
 
@@ -327,6 +384,51 @@ export default function AppealLetter({ text, streaming }) {
                 </svg>
                 <h3 className="text-sm font-semibold text-white">Send to Lawyer</h3>
               </div>
+
+              {/* AI Courtroom Summary Preview */}
+              {(parsedDenial || agents || overrideResult) && (
+                <div className="mb-4 rounded-xl overflow-hidden" style={{ background: '#111113', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <button
+                    onClick={() => setShowSummaryPreview(!showSummaryPreview)}
+                    className="w-full px-4 py-3 flex items-center justify-between text-left transition-colors"
+                    style={{ background: 'rgba(99,102,241,0.05)' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.08)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(99,102,241,0.05)'}
+                  >
+                    <div className="flex items-center gap-2">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="3" />
+                        <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+                      </svg>
+                      <span className="text-xs font-medium text-[#a5b4fc]">
+                        AI Courtroom Summary will be attached as PDF
+                      </span>
+                    </div>
+                    <svg 
+                      width="12" 
+                      height="12" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="#52525b" 
+                      strokeWidth="2.5" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                      className="transition-transform duration-200"
+                      style={{ transform: showSummaryPreview ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
+                  
+                  {showSummaryPreview && (
+                    <div className="px-4 py-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+                      <pre className="text-[10px] text-[#71717a] whitespace-pre-wrap font-mono leading-relaxed">
+                        {buildSummaryPreview(parsedDenial, agents, rebuttals, overrideResult)}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-3">
                 <div>

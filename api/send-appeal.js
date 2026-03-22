@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { generateCourtroomPDF } from './utils/generateCourtroomPDF.js';
 
 export default async function handler(req, res) {
   try {
@@ -27,14 +28,16 @@ export default async function handler(req, res) {
       });
     }
 
-    const { recipientEmail, recipientName, subject, appealText, userEmail } = req.body;
+    const { recipientEmail, recipientName, subject, appealText, userEmail, courtroomData } = req.body;
 
     console.log('[send-appeal] Request payload:', {
       recipientEmail: recipientEmail ? '***@' + recipientEmail.split('@')[1] : 'missing',
       recipientName: recipientName || 'not provided',
       hasAppealText: !!appealText,
       appealTextLength: appealText ? appealText.length : 0,
-      userEmail: userEmail ? '***@' + userEmail.split('@')[1] : 'not provided'
+      userEmail: userEmail ? '***@' + userEmail.split('@')[1] : 'not provided',
+      hasCourtroomData: !!courtroomData,
+      courtroomDataKeys: courtroomData ? Object.keys(courtroomData) : []
     });
 
     // Validation
@@ -86,18 +89,46 @@ export default async function handler(req, res) {
       });
     }
 
-    // Construct email body with intro
+    // Generate AI Courtroom Summary PDF if courtroom data is provided
+    let courtroomPDF = null;
+    if (courtroomData) {
+      try {
+        courtroomPDF = await generateCourtroomPDF(courtroomData);
+        console.log('[send-appeal] Courtroom PDF generated:', {
+          hasPDF: !!courtroomPDF,
+          pdfSize: courtroomPDF ? courtroomPDF.length : 0
+        });
+      } catch (pdfError) {
+        console.warn('[send-appeal] Failed to generate courtroom PDF:', pdfError.message);
+        console.error('[send-appeal] PDF error stack:', pdfError.stack);
+      }
+    } else {
+      console.log('[send-appeal] No courtroom data provided - skipping PDF generation');
+    }
+
+    // Construct email body with intro and appeal letter
     const emailBody = `Dear ${recipientName || 'Legal Counsel'},
 
 I am writing to formally appeal a recent denial decision. Please find the complete appeal letter below.
 
+${courtroomPDF ? `IMPORTANT: A detailed AI Courtroom Analysis Summary is attached as a PDF document. This summary provides comprehensive insights into the adversarial analysis conducted by 6 specialized AI agents, including:
+• Case overview and denial reasons
+• Arguments from each AI agent (Bias Auditor, Precedent Agent, Circumstance Agent, Legal Agent)
+• Defense position and rebuttals
+• Judge's assessment and final outcome
+• Recommended focus areas for legal review
+
+Please review the attached PDF for the complete analysis.
+
+` : ''}────────────────────────────────────────────────────────────────────────────
+APPEAL LETTER
 ────────────────────────────────────────────────────────────────────────────
 
 ${appealText}
 
 ────────────────────────────────────────────────────────────────────────────
 
-This appeal was prepared with the assistance of ${appName}, an AI-powered legal analysis tool.
+This appeal was prepared with the assistance of ${appName}, an AI-powered legal analysis tool${courtroomPDF ? ' that simulates an adversarial courtroom with 6 specialized AI agents' : ''}.
 
 Best regards`;
 
@@ -130,12 +161,24 @@ Best regards`;
       emailData.reply_to = userEmail;
     }
 
+    // Add PDF attachment if generated
+    if (courtroomPDF) {
+      emailData.attachments = [
+        {
+          filename: 'AI_Courtroom_Analysis.pdf',
+          content: courtroomPDF
+        }
+      ];
+    }
+
     console.log('[send-appeal] Sending email via Resend:', {
       from: fromEmail,
       to: recipientEmail,
       subject: emailData.subject,
       hasReplyTo: !!emailData.reply_to,
-      bodyLength: emailBody.length
+      bodyLength: emailBody.length,
+      hasAttachment: !!courtroomPDF,
+      attachmentSize: courtroomPDF ? courtroomPDF.length : 0
     });
 
     // Send email using Resend SDK
