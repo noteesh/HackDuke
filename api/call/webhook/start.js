@@ -1,6 +1,7 @@
 export default async function handler(req, res) {
   const params  = { ...req.query, ...req.body };
   const encoded = params.lines;
+  const baseUrl = process.env.VITE_API_URL;
 
   const twiml = ['<?xml version="1.0" encoding="UTF-8"?><Response>'];
 
@@ -9,7 +10,8 @@ export default async function handler(req, res) {
   } else {
     const lines = JSON.parse(Buffer.from(encoded, 'base64url').toString());
     for (const line of lines) {
-      twiml.push(`<Say>${line}</Say>`);
+      const encodedText = Buffer.from(line).toString('base64url');
+      twiml.push(`<Play volume="20">${baseUrl}/api/call/audio?text=${encodedText}</Play>`);
       twiml.push('<Pause length="1"/>');
     }
     twiml.push('<Hangup/>');
