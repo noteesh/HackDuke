@@ -389,8 +389,8 @@ function DebateThread({ agentId, agentRounds, rebuttalRounds }) {
           {finalVerdict ? (
             <span className="text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0"
               style={finalVerdict === 'CONCEDED'
-                ? { background: 'rgba(244,63,94,0.12)', color: '#34d399', border: '1px solid rgba(52,211,153,0.2)'}
-                : { background: 'rgba(52,211,153,0.10)', color: '#fb7185', border: '1px solid rgba(244,63,94,0.25)' }}>
+                ? { background: 'rgba(52,211,153,0.10)', color: '#34d399', border: '1px solid rgba(52,211,153,0.2)'}
+                : { background: 'rgba(244,63,94,0.12)', color: '#fb7185', border: '1px solid rgba(244,63,94,0.25)' }}>
               {finalVerdict === 'CONCEDED' ? '✓ Conceded' : '✗ Rebutted'}
             </span>
           ) : isLive ? (
