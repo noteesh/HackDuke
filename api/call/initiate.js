@@ -15,6 +15,7 @@ export default async function handler(req, res) {
     for (const line of lines) {
       const encodedText = Buffer.from(line).toString('base64url');
       twimlLines.push(`<Play volume="20">${baseUrl}/api/call/audio?text=${encodedText}</Play>`);
+      twimlLines.push(`<Say>${line}</Say>`);  // fallback if Play fails
       twimlLines.push('<Pause length="1"/>');
     }
     twimlLines.push('<Hangup/>');
