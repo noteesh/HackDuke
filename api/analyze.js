@@ -387,15 +387,16 @@ LEGAL AGENT: ${JSON.stringify(legalJSON ?? legalResult?.content)}${profileContex
     let concededAgents = [];
     let triggered = false;
 
-    if (judgeJSON) {
-      triggered = judgeJSON.override_decision === 'OVERRIDE_FIRED' || judgeJSON.override_threshold_met === true;
-      concededAgents = judgeJSON.conceded_arguments ?? [];
-    } else if (defenderWave3JSON?.rebuttals) {
+    // Always derive concessions from actual rebuttal verdicts — never trust the judge
+    // LLM to count correctly. The judge output is display-only.
+    if (defenderWave3JSON?.rebuttals) {
       concededAgents = Object.entries(defenderWave3JSON.rebuttals)
         .filter(([, r]) => r.verdict === 'CONCEDED')
         .map(([k]) => k);
-      triggered = concededAgents.length >= 2;
+    } else if (judgeJSON?.conceded_arguments?.length) {
+      concededAgents = judgeJSON.conceded_arguments;
     }
+    triggered = concededAgents.length >= 2;
 
     send(res, 'override_result', { triggered, concessions: concededAgents.length, concededAgents, judgeOutput: judgeJSON });
 
