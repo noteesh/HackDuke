@@ -1,30 +1,29 @@
 import twilio from 'twilio';
 
-function encodeLines(lines) {
-  return Buffer.from(JSON.stringify(lines)).toString('base64url');
-}
-
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { phone_number, lines } = req.body;
-
-  if (!phone_number || !lines?.length) {
-    return res.status(400).json({ error: 'phone_number and lines are required' });
-  }
+  if (!phone_number || !lines?.length) return res.status(400).json({ error: 'phone_number and lines required' });
 
   try {
     const client  = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-    const encoded = encodeLines(lines);
     const baseUrl = process.env.VITE_API_URL;
+
+    // Build TwiML directly here instead of passing lines via URL
+    const twimlLines = ['<?xml version="1.0" encoding="UTF-8"?><Response>'];
+    for (const line of lines) {
+      const encodedText = Buffer.from(line).toString('base64url');
+      twimlLines.push(`<Play volume="20">${baseUrl}/api/call/audio?text=${encodedText}</Play>`);
+      twimlLines.push('<Pause length="1"/>');
+    }
+    twimlLines.push('<Hangup/>');
+    const twimlString = twimlLines.join('');
 
     const call = await client.calls.create({
       to:     phone_number,
       from:   process.env.TWILIO_PHONE_NUMBER,
-      url:    `${baseUrl}/api/call/webhook/start?lines=${encoded}&turn=0`,
-      method: 'POST',
+      twiml:  twimlString,  // pass TwiML directly, no webhook needed
     });
 
     return res.status(200).json({ call_sid: call.sid });
