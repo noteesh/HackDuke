@@ -26,6 +26,7 @@ export default async function handler(req, res) {
       url:    `${baseUrl}/api/call/webhook/start?lines=${encoded}&turn=0`,
       method: 'POST',
       machineDetection: 'DetectMessageEnd',  // waits for voicemail beep before playing
+      sendDigits: 'wwww1',
     });
 
     return res.status(200).json({ call_sid: call.sid });
