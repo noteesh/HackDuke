@@ -715,17 +715,25 @@ export default function App() {
         break;
 
       case 'agent_start':
-        setAgents(prev => ({ ...prev, [data.agentId]: { ...prev[data.agentId], status: 'arguing' } }));
+        setAgents(prev => {
+          const next = { ...prev, [data.agentId]: { ...prev[data.agentId], status: 'arguing' } };
+          finalState.current.agents = next;
+          return next;
+        });
         break;
 
       case 'agent_chunk':
-        setAgents(prev => ({
-          ...prev,
-          [data.agentId]: {
-            ...prev[data.agentId],
-            content: (prev[data.agentId]?.content ?? '') + data.chunk,
-          },
-        }));
+        setAgents(prev => {
+          const next = {
+            ...prev,
+            [data.agentId]: {
+              ...prev[data.agentId],
+              content: (prev[data.agentId]?.content ?? '') + data.chunk,
+            },
+          };
+          finalState.current.agents = next;
+          return next;
+        });
         // Accumulate challenger content so we can show it in debate threads
         if (CHALLENGER_IDS.includes(data.agentId)) {
           agentContentAccumulator.current[data.agentId] =
@@ -734,10 +742,14 @@ export default function App() {
         break;
 
       case 'agent_complete':
-        setAgents(prev => ({
-          ...prev,
-          [data.agentId]: { ...prev[data.agentId], status: 'done', data: data.data ?? null },
-        }));
+        setAgents(prev => {
+          const next = {
+            ...prev,
+            [data.agentId]: { ...prev[data.agentId], status: 'done', data: data.data ?? null },
+          };
+          finalState.current.agents = next;
+          return next;
+        });
         break;
 
       case 'round_start': {
@@ -746,14 +758,22 @@ export default function App() {
         // Round 1: attacker content was accumulated BEFORE this event fires — save it now
         if (round === 1) {
           const captured = { ...agentContentAccumulator.current };
-          setAgentRounds(prev => ({ ...prev, 1: captured }));
+          setAgentRounds(prev => {
+            const next = { ...prev, 1: captured };
+            finalState.current.agentRounds = next;
+            return next;
+          });
           agentContentAccumulator.current = {};
         }
-        setRebuttalRounds(prev => [...prev, {
-          round,
-          activeAgents,
-          rebuttals: Object.fromEntries(activeAgents.map(id => [id, { status: 'pending', content: '', result: null }])),
-        }]);
+        setRebuttalRounds(prev => {
+          const next = [...prev, {
+            round,
+            activeAgents,
+            rebuttals: Object.fromEntries(activeAgents.map(id => [id, { status: 'pending', content: '', result: null }])),
+          }];
+          finalState.current.rebuttalRounds = next;
+          return next;
+        });
         // Reset agent content for counter-attacks in rounds 2+
         if (round > 1) {
           agentContentAccumulator.current = {};
@@ -762,6 +782,7 @@ export default function App() {
             for (const id of activeAgents) {
               next[id] = { ...next[id], status: 'pending', content: '' };
             }
+            finalState.current.agents = next;
             return next;
           });
         }
@@ -772,7 +793,11 @@ export default function App() {
         // Round 2+: counter-attack content is fully accumulated by now — save it
         if (data.round > 1) {
           const captured = { ...agentContentAccumulator.current };
-          setAgentRounds(prev => ({ ...prev, [data.round]: captured }));
+          setAgentRounds(prev => {
+            const next = { ...prev, [data.round]: captured };
+            finalState.current.agentRounds = next;
+            return next;
+          });
           agentContentAccumulator.current = {};
         }
         break;
@@ -782,44 +807,72 @@ export default function App() {
         break;
 
       case 'rebuttal_section_start':
-        setRebuttals(prev => ({ ...prev, [data.agentId]: { ...prev[data.agentId], status: 'arguing' } }));
-        setRebuttalRounds(prev => prev.map(r =>
-          r.round === data.round
-            ? { ...r, rebuttals: { ...r.rebuttals, [data.agentId]: { status: 'arguing', content: '', result: null } } }
-            : r
-        ));
+        setRebuttals(prev => {
+          const next = { ...prev, [data.agentId]: { ...prev[data.agentId], status: 'arguing' } };
+          finalState.current.rebuttals = next;
+          return next;
+        });
+        setRebuttalRounds(prev => {
+          const next = prev.map(r =>
+            r.round === data.round
+              ? { ...r, rebuttals: { ...r.rebuttals, [data.agentId]: { status: 'arguing', content: '', result: null } } }
+              : r
+          );
+          finalState.current.rebuttalRounds = next;
+          return next;
+        });
         break;
 
       case 'rebuttal_chunk':
-        setRebuttals(prev => ({
-          ...prev,
-          [data.agentId]: {
-            ...prev[data.agentId],
-            content: (prev[data.agentId]?.content ?? '') + data.chunk,
-          },
-        }));
-        setRebuttalRounds(prev => prev.map(r =>
-          r.round === data.round
-            ? { ...r, rebuttals: { ...r.rebuttals, [data.agentId]: { ...r.rebuttals[data.agentId], content: (r.rebuttals[data.agentId]?.content ?? '') + data.chunk } } }
-            : r
-        ));
+        setRebuttals(prev => {
+          const next = {
+            ...prev,
+            [data.agentId]: {
+              ...prev[data.agentId],
+              content: (prev[data.agentId]?.content ?? '') + data.chunk,
+            },
+          };
+          finalState.current.rebuttals = next;
+          return next;
+        });
+        setRebuttalRounds(prev => {
+          const next = prev.map(r =>
+            r.round === data.round
+              ? { ...r, rebuttals: { ...r.rebuttals, [data.agentId]: { ...r.rebuttals[data.agentId], content: (r.rebuttals[data.agentId]?.content ?? '') + data.chunk } } }
+              : r
+          );
+          finalState.current.rebuttalRounds = next;
+          return next;
+        });
         break;
 
       case 'rebuttal_result': {
         const res = data.result;
-        setRebuttals(prev => ({
-          ...prev,
-          [data.agentId]: { ...prev[data.agentId], status: res === 'CONCEDED' ? 'conceded' : 'rebutted', result: res },
-        }));
-        setRebuttalRounds(prev => prev.map(r =>
-          r.round === data.round
-            ? { ...r, rebuttals: { ...r.rebuttals, [data.agentId]: { ...r.rebuttals[data.agentId], status: res === 'CONCEDED' ? 'conceded' : 'rebutted', result: res } } }
-            : r
-        ));
-        setAgents(prev => ({
-          ...prev,
-          [data.agentId]: { ...prev[data.agentId], rebuttalResult: res },
-        }));
+        setRebuttals(prev => {
+          const next = {
+            ...prev,
+            [data.agentId]: { ...prev[data.agentId], status: res === 'CONCEDED' ? 'conceded' : 'rebutted', result: res },
+          };
+          finalState.current.rebuttals = next;
+          return next;
+        });
+        setRebuttalRounds(prev => {
+          const next = prev.map(r =>
+            r.round === data.round
+              ? { ...r, rebuttals: { ...r.rebuttals, [data.agentId]: { ...r.rebuttals[data.agentId], status: res === 'CONCEDED' ? 'conceded' : 'rebutted', result: res } } }
+              : r
+          );
+          finalState.current.rebuttalRounds = next;
+          return next;
+        });
+        setAgents(prev => {
+          const next = {
+            ...prev,
+            [data.agentId]: { ...prev[data.agentId], rebuttalResult: res },
+          };
+          finalState.current.agents = next;
+          return next;
+        });
         if (res === 'CONCEDED') setConcessionCount(n => n + 1);
         break;
       }
@@ -913,13 +966,17 @@ export default function App() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            userId:           user.sub,
+            userId:            user.sub,
             denialText,
-            parsedDenial:     finalState.current.parsedDenial     ?? null,
-            overrideTriggered:finalState.current.overrideTriggered ?? false,
-            concessionCount:  finalState.current.concessionCount   ?? 0,
-            concededAgents:   finalState.current.concededAgents    ?? [],
-            appealLetter:     finalState.current.appealLetter      ?? '',
+            parsedDenial:      finalState.current.parsedDenial      ?? null,
+            agents:            finalState.current.agents             ?? null,
+            rebuttals:         finalState.current.rebuttals          ?? null,
+            rebuttalRounds:    finalState.current.rebuttalRounds     ?? [],
+            agentRounds:       finalState.current.agentRounds        ?? {},
+            overrideTriggered: finalState.current.overrideTriggered  ?? false,
+            concessionCount:   finalState.current.concessionCount    ?? 0,
+            concededAgents:    finalState.current.concededAgents     ?? [],
+            appealLetter:      finalState.current.appealLetter       ?? '',
           }),
         }).catch(err => console.warn('[cases] Save failed:', err));
       }
