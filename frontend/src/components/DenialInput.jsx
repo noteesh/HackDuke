@@ -1,15 +1,82 @@
 import Footer from './Footer.jsx';
 
-const SAMPLE_DENIAL = `Dear Applicant,
+// Sample A — weak case for the challenger agents. Specific metrics, full disclosures,
+// multiple independent disqualifiers. Defense should hold easily.
+const SAMPLE_DENIAL_WEAK = `Date: March 14, 2026
+Applicant: Jordan M. Casey
+Application ID: FNB-2026-001847
+Application Type: Personal Loan — $12,000
+Institution: First National Bank, N.A.
 
-We regret to inform you that your application for a personal loan of $5,000 has been denied. This decision was based on our automated review system.
+Dear Mr. Casey,
 
-Primary reason: Insufficient credit history.
-Secondary reason: Debt-to-income ratio.
+Thank you for your application for a personal loan of $12,000. After a thorough review of your credit profile, we are unable to approve your request at this time.
 
-You have the right to request the specific reasons within 60 days.
+SPECIFIC REASONS FOR DENIAL:
 
-- AutoLend Financial`;
+  1. Credit score below minimum threshold
+     Your current FICO Score 8 is 541 (obtained from Equifax on March 13, 2026).
+     Our minimum required score for this loan product is 640.
+
+  2. Debt-to-income ratio exceeds maximum
+     Your verified monthly debt obligations total $3,840 against a gross monthly
+     income of $4,200, resulting in a DTI of 91.4%. Our maximum permitted DTI
+     for unsecured personal loans is 43%.
+
+  3. Recent derogatory credit events
+     Our review identified three open collection accounts totaling $7,214,
+     a Chapter 7 bankruptcy discharge dated September 2024 (within our 36-month
+     lookback period), and two accounts 90+ days past due in the last 12 months.
+
+NOTICE OF ADVERSE ACTION:
+
+This notice is issued pursuant to the Equal Credit Opportunity Act (ECOA), 15 U.S.C. § 1691, and the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681m. You have the right to request the specific reasons for this decision within 60 days of receiving this notice.
+
+Credit reporting agency: Equifax Information Services LLC
+P.O. Box 740256, Atlanta, GA 30374 · 1-800-685-1111
+
+You may obtain a free copy of your credit report from the agency above. If you believe any information in your report is inaccurate, you have the right to dispute it directly with the agency.
+
+To discuss alternative products or future eligibility, please contact our lending team at 1-800-555-0147 or visit any branch location.
+
+Sincerely,
+First National Bank, N.A.
+Consumer Lending Division · NMLS #112358`;
+
+// Sample B — strong case for the challenger agents. Vague reasons, no disclosed metrics,
+// algorithmic opacity, protected-class indicators, ECOA notice deficiencies.
+const SAMPLE_DENIAL_STRONG = `Date: March 14, 2026
+Applicant: Marcus J. Williams
+Application ID: ALF-2026-084471
+Application Type: Personal Loan — $18,500
+Institution: AutoLend Financial Services, N.A.
+
+Dear Mr. Williams,
+
+After careful review, we regret to inform you that your application for a personal loan in the amount of $18,500 has been denied. This decision was rendered by our automated underwriting system on March 14, 2026.
+
+REASONS FOR DENIAL:
+
+  1. Insufficient credit history
+  2. Debt-to-income ratio exceeds acceptable threshold
+  3. Insufficient credit score
+
+NOTICE OF ADVERSE ACTION:
+
+This notice is provided pursuant to the Equal Credit Opportunity Act (ECOA), 15 U.S.C. § 1691, and the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681. You have the right to request, within 60 days of this notice, a statement of specific reasons for the denial. You also have the right to a free copy of your credit report from the reporting agency used in this decision.
+
+Credit reporting agency used: Experian
+Address: P.O. Box 4500, Allen, TX 75013
+Phone: 1-888-397-3742
+
+No specific score threshold, applicant metric, or algorithmic weighting was disclosed as part of this decision. AutoLend Financial's proprietary risk model incorporates factors including but not limited to payment history, outstanding balances, and length of credit relationships.
+
+If you have questions, contact our loan servicing department at 1-800-555-0192.
+
+Sincerely,
+AutoLend Financial Services, N.A.
+Automated Lending Division
+NMLS #389204`;
 
 export default function DenialInput({ denialText, onTextChange, onSubmit, onShowImpact }) {
   return (
@@ -67,12 +134,21 @@ export default function DenialInput({ denialText, onTextChange, onSubmit, onShow
             <label className="text-xs font-semibold text-[#a1a1aa] uppercase tracking-wider">
               Denial Letter
             </label>
-            <button
-              onClick={() => onTextChange(SAMPLE_DENIAL)}
-              className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors font-medium"
-            >
-              Load sample
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onTextChange(SAMPLE_DENIAL_STRONG)}
+                className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors font-medium"
+              >
+                Strong case
+              </button>
+              <span className="text-[#3f3f46] text-xs">·</span>
+              <button
+                onClick={() => onTextChange(SAMPLE_DENIAL_WEAK)}
+                className="text-xs text-[#52525b] hover:text-[#71717a] transition-colors font-medium"
+              >
+                Weak case
+              </button>
+            </div>
           </div>
           <textarea
             value={denialText}
