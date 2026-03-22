@@ -588,15 +588,15 @@ function RebuttalTab({ rebuttalRounds, rebuttals, agentRounds, overrideResult, p
           <JudgePanel judgeOutput={overrideResult.judgeOutput} />
         )}
 
-        {/* Override fired — small confirmation, appeal tab handles the letter */}
+        {/* VerdictX Success — small confirmation, appeal tab handles the letter */}
         {overrideResult?.triggered && (
           <div
             className="rounded-xl p-4 animate-slide-up"
-            style={{ background: 'rgba(244,63,94,0.07)', border: '1px solid rgba(244,63,94,0.25)' }}
+            style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.25)' }}
           >
-            <div className="text-sm font-semibold text-[#fb7185] mb-1">Override Fired</div>
+            <div className="text-sm font-semibold text-[#34d399] mb-1">VerdictX Activated in Your Favor</div>
             <div className="text-xs text-[#71717a]">
-              {overrideResult.concessions} of 4 challenges conceded. Defense collapsed — see the Appeal tab for your letter.
+              {overrideResult.concessions} of 4 challenges conceded. The institution's defense collapsed — see the Appeal tab for your letter.
             </div>
           </div>
         )}
@@ -922,7 +922,7 @@ export default function App() {
   return (
     <AuthGate>
       <div className="h-screen flex flex-col overflow-hidden" style={{ background: '#0a0a0b', color: '#f4f4f5' }}>
-        {showFlash && <OverrideFlash />}
+        {/* {showFlash && <OverrideFlash />} */}
 
         {/* ── Top bar ── */}
         <div

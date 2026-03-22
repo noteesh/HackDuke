@@ -474,7 +474,7 @@ export default function AgentDebateGraph({ agents }) {
                 DEFENSE
               </text>
               {/* Status */}
-              <text x={pos.x} y={pos.y + 24} textAnchor="middle" fill={state.status === 'arguing' ? '#818cf8' : state.status === 'done' ? '#52525b' : '#3f3f46'} fontSize="9" fontFamily="Inter, sans-serif">
+              <text x={pos.x} y={pos.y + 24} textAnchor="middle" fill={state.status === 'arguing' ? '#818cf8' : state.status === 'done' ? '#52525b' : '#3f3f46'} fontSize="8" fontFamily="Inter, sans-serif">
                 {state.status === 'arguing' ? '● Arguing' : state.status === 'done' ? '✓ Done' : '○ Pending'}
               </text>
             </g>
@@ -541,7 +541,7 @@ export default function AgentDebateGraph({ agents }) {
                 CHALLENGER
               </text>
               {/* Status */}
-              <text x={pos.x} y={pos.y + 24} textAnchor="middle" fill={statusColor} fontSize="9" fontFamily="Inter, sans-serif">
+              <text x={pos.x} y={pos.y + 24} textAnchor="middle" fill={statusColor} fontSize="8" fontFamily="Inter, sans-serif">
                 {statusText}
               </text>
             </g>
