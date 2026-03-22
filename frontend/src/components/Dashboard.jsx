@@ -86,7 +86,7 @@ function CaseCard({ c, onOpen }) {
   );
 }
 
-export default function Dashboard({ onNewCase, onOpenCase, onShowImpact }) {
+export default function Dashboard({ onNewCase, onOpenCase, onShowImpact, userProfile, onEditProfile }) {
   const { user, logout } = useAuth0();
   const [cases, setCases]     = useState([]);
   const [loading, setLoading] = useState(true);
@@ -171,6 +171,78 @@ export default function Dashboard({ onNewCase, onOpenCase, onShowImpact }) {
             New Case
           </button>
         </div>
+
+        {/* ── Profile card ── */}
+        {onEditProfile && (
+          <button
+            onClick={onEditProfile}
+            className="w-full text-left rounded-2xl p-4 transition-all"
+            style={{ background: '#111113', border: '1px solid rgba(255,255,255,0.07)' }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'rgba(99,102,241,0.10)', border: '1px solid rgba(99,102,241,0.2)' }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-white">Your Profile</span>
+                    {userProfile ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                        style={{ background: 'rgba(52,211,153,0.08)', color: '#34d399', border: '1px solid rgba(52,211,153,0.18)' }}>
+                        Complete
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                        style={{ background: 'rgba(245,158,11,0.08)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.18)' }}>
+                        Not set
+                      </span>
+                    )}
+                  </div>
+                  {userProfile ? (
+                    <div className="flex flex-wrap gap-1.5 mt-1.5">
+                      {userProfile.ageRange && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full"
+                          style={{ background: 'rgba(255,255,255,0.05)', color: '#71717a', border: '1px solid rgba(255,255,255,0.07)' }}>
+                          {userProfile.ageRange}
+                        </span>
+                      )}
+                      {userProfile.state && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full"
+                          style={{ background: 'rgba(255,255,255,0.05)', color: '#71717a', border: '1px solid rgba(255,255,255,0.07)' }}>
+                          {userProfile.state}
+                        </span>
+                      )}
+                      {userProfile.employmentStatus && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full"
+                          style={{ background: 'rgba(255,255,255,0.05)', color: '#71717a', border: '1px solid rgba(255,255,255,0.07)' }}>
+                          {userProfile.employmentStatus}
+                        </span>
+                      )}
+                      {userProfile.creditScoreRange && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full"
+                          style={{ background: 'rgba(255,255,255,0.05)', color: '#71717a', border: '1px solid rgba(255,255,255,0.07)' }}>
+                          {userProfile.creditScoreRange}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-[#52525b] mt-0.5">
+                      Add context to help agents find bias in your denials
+                    </p>
+                  )}
+                </div>
+              </div>
+              <span className="text-[10px] text-[#52525b] flex-shrink-0 ml-4">Edit →</span>
+            </div>
+          </button>
+        )}
 
         {/* ── How it works (shown only when no cases) ── */}
         {!loading && cases.length === 0 && (

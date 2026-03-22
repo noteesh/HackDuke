@@ -10,6 +10,7 @@ import OverrideFlash from './components/OverrideFlash.jsx';
 import AppealLetter from './components/AppealLetter.jsx';
 import ImpactPage from './components/ImpactPage.jsx';
 import Footer from './components/Footer.jsx';
+import ProfileSurvey from './components/ProfileSurvey.jsx';
 
 const CHALLENGER_IDS = ['bias_auditor', 'precedent_agent', 'circumstance_agent', 'legal_agent'];
 
@@ -688,6 +689,26 @@ export default function App() {
   // Refs to capture final state for MongoDB save (avoids stale closure in async loop)
   const finalState = useRef({});
 
+  // ── User profile (demographic context for agents) ──────────────────────────
+  const [userProfile, setUserProfile]           = useState(null);
+  const [showProfileSurvey, setShowProfileSurvey] = useState(false);
+  const profileChecked = useRef(false);
+
+  useEffect(() => {
+    if (!user?.sub || profileChecked.current) return;
+    profileChecked.current = true;
+    fetch(`/api/profile?userId=${encodeURIComponent(user.sub)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.exists === false || !data.userId) {
+          setShowProfileSurvey(true);
+        } else {
+          setUserProfile(data);
+        }
+      })
+      .catch(() => { /* proceed without profile if API fails */ });
+  }, [user?.sub]);
+
   // Auto-advance tabs as pipeline progresses
   useEffect(() => {
     const anyArguing = Object.values(agents).some(a => a.status === 'arguing' || a.status === 'done');
@@ -929,7 +950,7 @@ export default function App() {
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ denialText }),
+        body: JSON.stringify({ denialText, userProfile: userProfile ?? null }),
       });
 
       if (!response.ok) throw new Error(`Server error: ${response.status}`);
@@ -986,6 +1007,23 @@ export default function App() {
     }
   };
 
+  // ── Profile survey gate (first login or edit from dashboard) ─────────────
+  if (showProfileSurvey) {
+    return (
+      <AuthGate onShowImpact={() => setPhase('impact')}>
+        <ProfileSurvey
+          userId={user?.sub}
+          initialData={userProfile}
+          onComplete={(profile) => {
+            setUserProfile(profile);
+            setShowProfileSurvey(false);
+          }}
+          onSkip={userProfile ? undefined : () => setShowProfileSurvey(false)}
+        />
+      </AuthGate>
+    );
+  }
+
   if (phase === 'impact') {
     return <ImpactPage onBack={() => setPhase('dashboard')} />;
   }
@@ -1024,6 +1062,8 @@ export default function App() {
             }
           }}
           onShowImpact={() => setPhase('impact')}
+          userProfile={userProfile}
+          onEditProfile={() => setShowProfileSurvey(true)}
         />
       </AuthGate>
     );

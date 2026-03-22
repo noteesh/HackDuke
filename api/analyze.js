@@ -225,7 +225,25 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { denialText } = req.body || {};
+  const { denialText, userProfile } = req.body || {};
+
+  function buildProfileContext(profile) {
+    if (!profile) return '';
+    const lines = ['\n\nAPPLICANT PROFILE (use this to identify potential bias and tailor arguments):'];
+    if (profile.raceEthnicity?.length)  lines.push(`Race/Ethnicity: ${profile.raceEthnicity.join(', ')}`);
+    if (profile.gender)                 lines.push(`Gender: ${profile.gender}`);
+    if (profile.ageRange)               lines.push(`Age Range: ${profile.ageRange}`);
+    if (profile.incomeRange)            lines.push(`Income Range: ${profile.incomeRange}`);
+    if (profile.employmentStatus)       lines.push(`Employment: ${profile.employmentStatus}`);
+    if (profile.creditScoreRange)       lines.push(`Credit Score Range: ${profile.creditScoreRange}`);
+    if (profile.state)                  lines.push(`State: ${profile.state}`);
+    if (profile.priorDenials)           lines.push(`Prior Denials (last 2 years): ${profile.priorDenials}`);
+    if (profile.disabilityStatus)       lines.push(`Disability Status: ${profile.disabilityStatus}`);
+    if (profile.veteranStatus)          lines.push(`Veteran Status: ${profile.veteranStatus}`);
+    return lines.length > 1 ? lines.join('\n') : '';
+  }
+
+  const profileContext = buildProfileContext(userProfile);
 
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
@@ -261,10 +279,10 @@ export default async function handler(req, res) {
 
     // ── Wave 2: 4 Attackers in parallel ─────────────────────────────────────
     const [biasResult, precedentResult, circumstanceResult, legalResult] = await Promise.all([
-      AGENTS.bias        ? invokeAgent(AGENTS.bias,         `Analyze this denial for discrimination signals: ${parserJSON}`) : Promise.resolve(null),
-      AGENTS.precedent   ? invokeAgent(AGENTS.precedent,    `Find precedent for challenging this denial: ${parserJSON}`)     : Promise.resolve(null),
-      AGENTS.circumstance? invokeAgent(AGENTS.circumstance, `Identify circumstance arguments for this denial: ${parserJSON}`) : Promise.resolve(null),
-      AGENTS.legal       ? invokeAgent(AGENTS.legal,        `Identify legal violations in this denial: ${parserJSON}`)       : Promise.resolve(null),
+      AGENTS.bias        ? invokeAgent(AGENTS.bias,         `Analyze this denial for discrimination signals: ${parserJSON}${profileContext}`) : Promise.resolve(null),
+      AGENTS.precedent   ? invokeAgent(AGENTS.precedent,    `Find precedent for challenging this denial: ${parserJSON}${profileContext}`)     : Promise.resolve(null),
+      AGENTS.circumstance? invokeAgent(AGENTS.circumstance, `Identify circumstance arguments for this denial: ${parserJSON}${profileContext}`) : Promise.resolve(null),
+      AGENTS.legal       ? invokeAgent(AGENTS.legal,        `Identify legal violations in this denial: ${parserJSON}${profileContext}`)       : Promise.resolve(null),
     ]);
 
     const biasJSON         = biasResult         ? tryParseJSON(biasResult.content)         : null;
@@ -360,7 +378,7 @@ DEFENDER WAVE 3 REBUTTALS: ${JSON.stringify(defenderWave3JSON)}
 BIAS AUDITOR: ${JSON.stringify(biasJSON ?? biasResult?.content)}
 PRECEDENT AGENT: ${JSON.stringify(precedentJSON ?? precedentResult?.content)}
 CIRCUMSTANCE AGENT: ${JSON.stringify(circumstanceJSON ?? circumstanceResult?.content)}
-LEGAL AGENT: ${JSON.stringify(legalJSON ?? legalResult?.content)}`;
+LEGAL AGENT: ${JSON.stringify(legalJSON ?? legalResult?.content)}${profileContext}`;
 
       const { content } = await invokeAgent(AGENTS.judge, judgePrompt);
       judgeJSON = tryParseJSON(content);
@@ -398,7 +416,7 @@ LEGAL AGENT: ${JSON.stringify(legalJSON ?? legalResult?.content)}`;
 
 ORIGINAL DENIAL: ${parserJSON}
 OVERRIDE JUDGE OUTPUT: ${JSON.stringify(judgeJSON)}
-CONCEDED AGENT OUTPUTS: ${JSON.stringify(concededOutputs)}`;
+CONCEDED AGENT OUTPUTS: ${JSON.stringify(concededOutputs)}${profileContext}`;
 
           const { content } = await invokeAgent(AGENTS.appeal, appealPrompt);
           const appealJSON = tryParseJSON(content);
