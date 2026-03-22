@@ -1,4 +1,4 @@
-const twilio = require('twilio');
+import twilio from 'twilio';
 
 function decodeLines(encoded) {
   return JSON.parse(Buffer.from(encoded, 'base64url').toString());
