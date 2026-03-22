@@ -294,7 +294,6 @@ export default async function handler(req, res) {
     await sleep(600);
 
     // ── Wave 3b: Defender rebuttals ──────────────────────────────────────────
-    send(res, 'rebuttal_start', {});
     await sleep(400);
 
     let defenderWave3JSON = null;
@@ -314,11 +313,22 @@ LEGAL AGENT: ${JSON.stringify(legalJSON ?? legalResult?.content)}`;
 
       const REBUTTAL_ORDER = ['bias_auditor', 'precedent_agent', 'circumstance_agent', 'legal_agent'];
 
+      // Determine which agents actually have rebuttals
+      const activeAgents = REBUTTAL_ORDER.filter(id => defenderWave3JSON?.rebuttals?.[id]);
+
+      // Send round_start so the frontend initialises rebuttalRounds state
+      send(res, 'round_start', { round: 1, total: 1, activeAgents });
+      await sleep(200);
+
+      // Send rebuttal_start (round 1) so the frontend captures attacker content
+      send(res, 'rebuttal_start', { round: 1 });
+      await sleep(200);
+
       for (const agentId of REBUTTAL_ORDER) {
         const rebuttal = defenderWave3JSON?.rebuttals?.[agentId];
         if (!rebuttal) continue;
 
-        send(res, 'rebuttal_section_start', { agentId });
+        send(res, 'rebuttal_section_start', { agentId, round: 1 });
 
         const rebuttalText = [
           `${agentId.replace(/_/g, ' ').toUpperCase()} — ${rebuttal.verdict}`,
@@ -328,11 +338,11 @@ LEGAL AGENT: ${JSON.stringify(legalJSON ?? legalResult?.content)}`;
         ].filter(Boolean).join('\n');
 
         for (const word of rebuttalText.split(/(\s+)/)) {
-          send(res, 'rebuttal_chunk', { agentId, chunk: word });
+          send(res, 'rebuttal_chunk', { agentId, chunk: word, round: 1 });
           await sleep(22);
         }
 
-        send(res, 'rebuttal_result', { agentId, result: rebuttal.verdict });
+        send(res, 'rebuttal_result', { agentId, result: rebuttal.verdict, round: 1 });
         await sleep(300);
       }
     }
