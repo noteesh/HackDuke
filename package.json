@@ -15,6 +15,7 @@
     "express": "^5.2.1",
     "express-openid-connect": "^2.19.4",
     "mongodb": "^7.1.0",
+    "pdfkit": "^0.18.0",
     "resend": "^6.9.4",
     "twilio": "^5.13.0"
   }

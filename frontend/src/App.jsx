@@ -1209,7 +1209,14 @@ export default function App() {
           )}
           {activeTab === 'appeal' && hasAppeal && (
             <div className="h-full overflow-y-auto scrollbar-thin">
-              <AppealLetter text={appealLetter} streaming={appealStreaming} />
+              <AppealLetter 
+                text={appealLetter} 
+                streaming={appealStreaming}
+                parsedDenial={parsedDenial}
+                agents={agents}
+                rebuttals={rebuttals}
+                overrideResult={overrideResult}
+              />
             </div>
           )}
         </div>
