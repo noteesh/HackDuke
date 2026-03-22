@@ -250,7 +250,7 @@ export default function AgentDebateGraph({ agents }) {
   const defPos = NODE_POSITIONS.denial_defender;
 
   return (
-    <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#0a0a0b' }}>
       <style>{`
         @keyframes fadeScaleIn {
           from { opacity: 0; transform: scale(0.95) translateY(4px); }
@@ -260,11 +260,130 @@ export default function AgentDebateGraph({ agents }) {
           0%, 100% { opacity: 0.6; transform: scale(1); }
           50%       { opacity: 0.15; transform: scale(1.18); }
         }
+        @keyframes gradientShift {
+          0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+          33% { transform: translate(-50%, -50%) rotate(120deg) scale(1.1); }
+          66% { transform: translate(-50%, -50%) rotate(240deg) scale(0.95); }
+        }
+        @keyframes floatOrb {
+          0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.4; }
+          25% { transform: translateY(-20px) translateX(10px); opacity: 0.6; }
+          50% { transform: translateY(-10px) translateX(-15px); opacity: 0.5; }
+          75% { transform: translateY(-25px) translateX(5px); opacity: 0.7; }
+        }
+        @keyframes particleFloat {
+          0% { transform: translateY(0px) translateX(0px); opacity: 0; }
+          10% { opacity: 0.8; }
+          90% { opacity: 0.8; }
+          100% { transform: translateY(-100vh) translateX(var(--drift)); opacity: 0; }
+        }
+        @keyframes meshPulse {
+          0%, 100% { opacity: 0.03; }
+          50% { opacity: 0.08; }
+        }
+        @keyframes scanline {
+          0% { transform: translateY(-100%); }
+          100% { transform: translateY(100vh); }
+        }
       `}</style>
+      
+      {/* Advanced Animated Background Layers */}
+      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+        {/* Gradient Mesh Background */}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          width: '150%',
+          height: '150%',
+          background: 'radial-gradient(circle at 30% 40%, rgba(99,102,241,0.15) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(245,158,11,0.12) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(52,211,153,0.08) 0%, transparent 60%)',
+          filter: 'blur(60px)',
+          animation: 'gradientShift 20s ease-in-out infinite',
+          transformOrigin: 'center',
+        }} />
+        
+        {/* Floating Orbs */}
+        {[...Array(8)].map((_, i) => (
+          <div key={`orb-${i}`} style={{
+            position: 'absolute',
+            left: `${15 + (i * 12)}%`,
+            top: `${20 + (i % 3) * 25}%`,
+            width: `${80 + (i % 3) * 40}px`,
+            height: `${80 + (i % 3) * 40}px`,
+            borderRadius: '50%',
+            background: i % 3 === 0 
+              ? 'radial-gradient(circle, rgba(99,102,241,0.2) 0%, rgba(99,102,241,0.05) 40%, transparent 70%)'
+              : i % 3 === 1
+              ? 'radial-gradient(circle, rgba(245,158,11,0.15) 0%, rgba(245,158,11,0.04) 40%, transparent 70%)'
+              : 'radial-gradient(circle, rgba(52,211,153,0.18) 0%, rgba(52,211,153,0.05) 40%, transparent 70%)',
+            filter: 'blur(20px)',
+            animation: `floatOrb ${8 + i * 2}s ease-in-out infinite`,
+            animationDelay: `${i * 0.5}s`,
+          }} />
+        ))}
+        
+        {/* Particle System */}
+        {[...Array(25)].map((_, i) => {
+          const drift = `${(Math.random() - 0.5) * 100}px`;
+          return (
+            <div key={`particle-${i}`} style={{
+              position: 'absolute',
+              left: `${Math.random() * 100}%`,
+              bottom: '-10px',
+              width: `${2 + Math.random() * 3}px`,
+              height: `${2 + Math.random() * 3}px`,
+              borderRadius: '50%',
+              background: i % 4 === 0 ? '#818cf8' : i % 4 === 1 ? '#fbbf24' : i % 4 === 2 ? '#34d399' : '#fb7185',
+              boxShadow: `0 0 ${4 + Math.random() * 6}px currentColor`,
+              animation: `particleFloat ${15 + Math.random() * 20}s linear infinite`,
+              animationDelay: `${Math.random() * 10}s`,
+            }}>
+              <style>{`
+                @keyframes particleFloat {
+                  0% { transform: translateY(0px) translateX(0px); opacity: 0; }
+                  10% { opacity: 0.8; }
+                  90% { opacity: 0.8; }
+                  100% { transform: translateY(-100vh) translateX(${drift}); opacity: 0; }
+                }
+              `}</style>
+            </div>
+          );
+        })}
+        
+        {/* Grid Pattern Overlay */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: `
+            linear-gradient(rgba(99,102,241,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(99,102,241,0.03) 1px, transparent 1px)
+          `,
+          backgroundSize: '50px 50px',
+          animation: 'meshPulse 8s ease-in-out infinite',
+        }} />
+        
+        {/* Scanline Effect */}
+        <div style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          height: '2px',
+          background: 'linear-gradient(to bottom, transparent, rgba(99,102,241,0.4), transparent)',
+          animation: 'scanline 8s linear infinite',
+          filter: 'blur(1px)',
+        }} />
+        
+        {/* Vignette */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'radial-gradient(ellipse at center, transparent 0%, rgba(10,10,11,0.4) 100%)',
+        }} />
+      </div>
 
       <svg
         viewBox={`0 0 ${SVG_W} ${SVG_H}`}
-        style={{ width: '100%', height: '100%', overflow: 'visible' }}
+        style={{ width: '100%', height: '100%', overflow: 'visible', position: 'relative', zIndex: 1 }}
         preserveAspectRatio="xMidYMid meet"
       >
         <defs>
