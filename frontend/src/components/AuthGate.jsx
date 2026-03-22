@@ -133,9 +133,8 @@ const BUILT_WITH = [
   {
     name: 'ElevenLabs',
     logo: (
-      <svg viewBox="0 0 80 24" fill="currentColor" className="h-5">
-        <text x="0" y="18" fontSize="16" fontWeight="700" fontFamily="Inter, sans-serif">11</text>
-        <text x="22" y="18" fontSize="16" fontWeight="400" fontFamily="Inter, sans-serif">ElevenLabs</text>
+      <svg viewBox="0 0 100 24" fill="currentColor" className="h-5">
+        <text x="0" y="18" fontSize="16" fontWeight="400" fontFamily="Inter, sans-serif">ElevenLabs</text>
       </svg>
     ),
   },
