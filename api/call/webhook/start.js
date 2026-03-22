@@ -12,7 +12,7 @@ function audioUrl(baseUrl, text) {
 export default async function handler(req, res) {
   const { lines: encoded, turn = '0' } = req.query;
   const currentTurn = parseInt(turn);
-  const baseUrl     = process.env.BASE_URL;
+  const baseUrl     = process.env.VITE_API_URL;
   const twiml       = new twilio.twiml.VoiceResponse();
 
   if (!encoded) {

@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   try {
     const client  = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
     const encoded = encodeLines(lines);
-    const baseUrl = process.env.BASE_URL;
+    const baseUrl = process.env.VITE_API_URL;
 
     const call = await client.calls.create({
       to:     phone_number,
