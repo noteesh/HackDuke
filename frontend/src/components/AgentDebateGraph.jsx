@@ -168,7 +168,7 @@ function DetailOverlay({ agentId, state, svgX, svgY, svgWidth, svgHeight, onClos
   };
 
   const handleMouseLeave = useCallback(() => {
-    closeTimer.current = setTimeout(onClose, 1500);
+    closeTimer.current = setTimeout(onClose, 750);
   }, [onClose]);
 
   const handleMouseEnter = useCallback(() => {
