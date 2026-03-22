@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import AuthGate from './components/AuthGate.jsx';
+import Dashboard from './components/Dashboard.jsx';
 import DenialInput from './components/DenialInput.jsx';
 import AgentCard from './components/AgentCard.jsx';
 import AgentDebateGraph from './components/AgentDebateGraph.jsx';
@@ -666,7 +667,7 @@ function RebuttalTab({ rebuttalRounds, rebuttals, agentRounds, overrideResult, p
 // ── Main App ──────────────────────────────────────────────────────────────────
 export default function App() {
   const { user, logout } = useAuth0();
-  const [phase, setPhase]             = useState('input');
+  const [phase, setPhase]             = useState('dashboard');
   const [activeTab, setActiveTab]     = useState('extracted');
   const [denialText, setDenialText]   = useState('');
   const [parsedDenial, setParsedDenial]   = useState(null);
@@ -683,6 +684,9 @@ export default function App() {
   // {[round]: {[agentId]: content}} — attacker text captured per round
   const [agentRounds, setAgentRounds] = useState({});
   const agentContentAccumulator = useRef({});
+
+  // Refs to capture final state for MongoDB save (avoids stale closure in async loop)
+  const finalState = useRef({});
 
   // Auto-advance tabs as pipeline progresses
   useEffect(() => {
@@ -707,6 +711,7 @@ export default function App() {
     switch (type) {
       case 'parsed':
         setParsedDenial(data);
+        finalState.current.parsedDenial = data;
         break;
 
       case 'agent_start':
@@ -821,6 +826,9 @@ export default function App() {
 
       case 'override_result':
         setOverrideResult(data);
+        finalState.current.overrideTriggered = data.triggered;
+        finalState.current.concessionCount   = data.concessions;
+        finalState.current.concededAgents    = data.concededAgents ?? [];
         if (data.triggered) {
           setShowFlash(true);
           setAppealStreaming(true);
@@ -829,7 +837,11 @@ export default function App() {
         break;
 
       case 'appeal_chunk':
-        setAppealLetter(prev => prev + data.chunk);
+        setAppealLetter(prev => {
+          const next = prev + data.chunk;
+          finalState.current.appealLetter = next;
+          return next;
+        });
         break;
 
       case 'complete':
@@ -858,6 +870,7 @@ export default function App() {
     setAgentRounds({});
     agentContentAccumulator.current = {};
     appealTabOpened.current = false;
+    finalState.current = {};
 
     try {
       const response = await fetch('/api/analyze', {
@@ -893,6 +906,23 @@ export default function App() {
           }
         }
       }
+
+      // Save completed case to MongoDB
+      if (user?.sub && finalState.current.parsedDenial) {
+        fetch('/api/cases', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId:           user.sub,
+            denialText,
+            parsedDenial:     finalState.current.parsedDenial     ?? null,
+            overrideTriggered:finalState.current.overrideTriggered ?? false,
+            concessionCount:  finalState.current.concessionCount   ?? 0,
+            concededAgents:   finalState.current.concededAgents    ?? [],
+            appealLetter:     finalState.current.appealLetter      ?? '',
+          }),
+        }).catch(err => console.warn('[cases] Save failed:', err));
+      }
     } catch (err) {
       console.error('Analysis error:', err);
       setPhase('input');
@@ -900,7 +930,46 @@ export default function App() {
   };
 
   if (phase === 'impact') {
-    return <ImpactPage onBack={() => setPhase('input')} />;
+    return <ImpactPage onBack={() => setPhase('dashboard')} />;
+  }
+
+  if (phase === 'dashboard') {
+    return (
+      <AuthGate onShowImpact={() => setPhase('impact')}>
+        <Dashboard
+          onNewCase={() => setPhase('input')}
+          onOpenCase={async (caseId) => {
+            // Fetch full case and load it into the analysis view (read-only replay)
+            try {
+              const r = await fetch(`/api/cases?userId=${encodeURIComponent(user.sub)}&caseId=${caseId}`);
+              const c = await r.json();
+              if (!c || c.error) return;
+              // Restore state from saved case
+              setDenialText(c.denialText ?? '');
+              setParsedDenial(c.parsedDenial ?? null);
+              if (c.agents) setAgents(c.agents);
+              if (c.rebuttals) setRebuttals(c.rebuttals);
+              if (c.rebuttalRounds) setRebuttalRounds(c.rebuttalRounds);
+              if (c.agentRounds) setAgentRounds(c.agentRounds);
+              setOverrideResult(c.overrideTriggered != null ? {
+                triggered: c.overrideTriggered,
+                concessions: c.concessionCount ?? 0,
+                concededAgents: c.concededAgents ?? [],
+              } : null);
+              setConcessionCount(c.concessionCount ?? 0);
+              setAppealLetter(c.appealLetter ?? '');
+              setAppealStreaming(false);
+              appealTabOpened.current = !!c.appealLetter;
+              setActiveTab('extracted');
+              setPhase('complete');
+            } catch (err) {
+              console.error('[openCase]', err);
+            }
+          }}
+          onShowImpact={() => setPhase('impact')}
+        />
+      </AuthGate>
+    );
   }
 
   if (phase === 'input') {
@@ -931,10 +1000,10 @@ export default function App() {
         >
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setPhase('input')}
+              onClick={() => setPhase('dashboard')}
               className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors text-[#52525b] hover:text-[#a1a1aa]"
               style={{ background: 'rgba(255,255,255,0.05)' }}
-              title="Back"
+              title="Back to dashboard"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 12H5M12 5l-7 7 7 7" />
