@@ -7,6 +7,8 @@ import AgentDebateGraph from './components/AgentDebateGraph.jsx';
 import RebuttalCard from './components/RebuttalCard.jsx';
 import OverrideFlash from './components/OverrideFlash.jsx';
 import AppealLetter from './components/AppealLetter.jsx';
+import ImpactPage from './components/ImpactPage.jsx';
+import Footer from './components/Footer.jsx';
 
 const CHALLENGER_IDS = ['bias_auditor', 'precedent_agent', 'circumstance_agent', 'legal_agent'];
 
@@ -34,103 +36,189 @@ const TABS = [
 ];
 
 // ── Parsed Denial Panel ───────────────────────────────────────────────────────
+function hasValue(v) {
+  if (v === null || v === undefined || v === '') return false;
+  if (Array.isArray(v)) return v.length > 0;
+  return true;
+}
+
+function confidenceColor(c) {
+  if (!c) return { color: '#52525b', bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.08)' };
+  const u = c.toUpperCase();
+  if (u === 'HIGH')   return { color: '#34d399', bg: 'rgba(52,211,153,0.10)', border: 'rgba(52,211,153,0.22)' };
+  if (u === 'MEDIUM') return { color: '#fbbf24', bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.22)' };
+  return             { color: '#fb7185', bg: 'rgba(244,63,94,0.10)',  border: 'rgba(244,63,94,0.22)'  };
+}
+
+function Field({ label, children }) {
+  return (
+    <div className="rounded-xl p-3" style={{ background: '#18181b', border: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className="text-[10px] text-[#52525b] uppercase tracking-wider mb-1.5">{label}</div>
+      {children}
+    </div>
+  );
+}
+
 function ExtractedTab({ parsedDenial, denialText }) {
   if (!parsedDenial) {
     return (
       <div className="p-6 space-y-2 animate-pulse max-w-2xl mx-auto w-full">
-        {[...Array(7)].map((_, i) => (
-          <div key={i} className="rounded-xl h-14" style={{ background: '#18181b' }} />
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="rounded-xl h-16" style={{ background: '#18181b' }} />
         ))}
       </div>
     );
   }
 
-  // Fields to highlight at the top
-  const PRIORITY = ['denial_type', 'institution_name', 'application_type', 'denial_date',
-    'stated_reasons', 'parsing_confidence', 'adverse_action_notice_present'];
+  const p = parsedDenial;
+  const cc = confidenceColor(p.parsing_confidence);
 
-  const entries = Object.entries(parsedDenial).filter(([k]) => k !== 'raw_text');
-  const priorityEntries = PRIORITY.map(k => [k, parsedDenial[k]]).filter(([, v]) => v !== undefined);
-  const restEntries = entries.filter(([k]) => !PRIORITY.includes(k));
+  // boolean flags that are true
+  const flags = [
+    p.adverse_action_notice_present && 'Adverse action notice present',
+    p.right_to_explanation_mentioned && 'Right to explanation mentioned',
+    p.appeal_process_mentioned && 'Appeal process mentioned',
+  ].filter(Boolean);
 
-  const renderVal = (val) => {
-    if (Array.isArray(val)) {
-      return val.length === 0 ? '—' : (
-        <ul className="space-y-0.5 mt-0.5">
-          {val.map((v, i) => (
-            <li key={i} className="text-xs text-white font-medium leading-snug">
-              {typeof v === 'object' ? JSON.stringify(v) : String(v)}
-            </li>
-          ))}
-        </ul>
-      );
-    }
-    if (typeof val === 'boolean') return val ? 'Yes' : 'No';
-    if (val === null || val === undefined || val === '') return '—';
-    return <span className="text-xs text-white font-medium leading-snug break-words">{String(val)}</span>;
-  };
+  // boolean flags that are false / missing
+  const missingFlags = [
+    p.adverse_action_notice_present === false && 'No adverse action notice',
+    p.right_to_explanation_mentioned === false && 'Right to explanation NOT mentioned',
+    p.appeal_process_mentioned === false && 'No appeal process described',
+  ].filter(Boolean);
+
+  // extra detail fields — only if they have actual values
+  const detailFields = [
+    { key: 'institution_type',   label: 'Institution type'   },
+    { key: 'applicant_name',     label: 'Applicant name'     },
+    { key: 'denial_date',        label: 'Denial date'        },
+    { key: 'appeal_deadline',    label: 'Appeal deadline'    },
+    { key: 'contact_info',       label: 'Contact info'       },
+    { key: 'parsing_notes',      label: 'Parser notes'       },
+  ].filter(({ key }) => hasValue(p[key]));
+
+  const arrayFields = [
+    { key: 'referenced_scores',    label: 'Referenced scores'    },
+    { key: 'referenced_criteria',  label: 'Referenced criteria'  },
+    { key: 'regulatory_references',label: 'Regulatory references'},
+  ].filter(({ key }) => hasValue(p[key]));
 
   return (
     <div className="h-full overflow-y-auto scrollbar-thin p-6">
-      <div className="max-w-2xl mx-auto space-y-6">
-        {/* Key fields */}
-        <div>
-          <p className="text-[10px] font-semibold text-[#52525b] uppercase tracking-widest mb-3">
-            Key Fields
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {priorityEntries.map(([key, val]) => (
-              <div
-                key={key}
-                className="rounded-xl p-3"
-                style={{ background: '#18181b', border: '1px solid rgba(255,255,255,0.06)' }}
-              >
-                <div className="text-[10px] text-[#52525b] capitalize mb-1">
-                  {key.replace(/_/g, ' ')}
-                </div>
-                {renderVal(val)}
-              </div>
-            ))}
+      <div className="max-w-2xl mx-auto space-y-5">
+
+        {/* Header row: institution + type + confidence */}
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-lg font-bold text-white leading-tight">
+              {p.institution_name || 'Unknown Institution'}
+            </p>
+            <p className="text-sm text-[#71717a] mt-0.5 capitalize">
+              {[p.application_type, p.denial_type].filter(Boolean).join(' · ') || 'Denial letter'}
+            </p>
           </div>
+          {p.parsing_confidence && (
+            <span
+              className="text-xs font-semibold px-3 py-1 rounded-full flex-shrink-0"
+              style={{ color: cc.color, background: cc.bg, border: `1px solid ${cc.border}` }}
+            >
+              {p.parsing_confidence} confidence
+            </span>
+          )}
         </div>
 
-        {/* Remaining fields */}
-        {restEntries.length > 0 && (
+        {/* Why denied */}
+        {hasValue(p.stated_reasons) && (
+          <Field label="Why the denial was given">
+            <ul className="space-y-1.5">
+              {p.stated_reasons.map((r, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className="mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#fb7185' }} />
+                  <span className="text-xs text-white font-medium leading-snug">{String(r)}</span>
+                </li>
+              ))}
+            </ul>
+          </Field>
+        )}
+
+        {/* Process flags */}
+        {(flags.length > 0 || missingFlags.length > 0) && (
           <div>
-            <p className="text-[10px] font-semibold text-[#52525b] uppercase tracking-widest mb-3">
-              Additional Details
+            <p className="text-[10px] font-semibold text-[#52525b] uppercase tracking-widest mb-2">
+              Procedural checks
             </p>
-            <div className="grid grid-cols-2 gap-2">
-              {restEntries.map(([key, val]) => (
-                <div
-                  key={key}
-                  className="rounded-xl p-3"
-                  style={{ background: '#111113', border: '1px solid rgba(255,255,255,0.05)' }}
-                >
-                  <div className="text-[10px] text-[#52525b] capitalize mb-1">
-                    {key.replace(/_/g, ' ')}
-                  </div>
-                  {renderVal(val)}
-                </div>
+            <div className="flex flex-wrap gap-2">
+              {flags.map(f => (
+                <span key={f} className="text-[11px] font-medium px-2.5 py-1 rounded-lg"
+                  style={{ background: 'rgba(52,211,153,0.08)', color: '#6ee7b7', border: '1px solid rgba(52,211,153,0.18)' }}>
+                  ✓ {f}
+                </span>
+              ))}
+              {missingFlags.map(f => (
+                <span key={f} className="text-[11px] font-medium px-2.5 py-1 rounded-lg"
+                  style={{ background: 'rgba(244,63,94,0.08)', color: '#fda4af', border: '1px solid rgba(244,63,94,0.18)' }}>
+                  ✗ {f}
+                </span>
               ))}
             </div>
           </div>
         )}
 
-        {/* Raw text */}
+        {/* Referenced scores */}
+        {hasValue(p.referenced_scores) && (
+          <Field label="Credit scores referenced">
+            <div className="flex flex-wrap gap-2">
+              {p.referenced_scores.map((s, i) => {
+                const label = typeof s === 'object'
+                  ? `${s.score_type ?? 'Score'}: ${s.score_value ?? '—'}`
+                  : String(s);
+                return (
+                  <span key={i} className="text-xs font-semibold px-2.5 py-1 rounded-lg"
+                    style={{ background: 'rgba(99,102,241,0.12)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.22)' }}>
+                    {label}
+                  </span>
+                );
+              })}
+            </div>
+          </Field>
+        )}
+
+        {/* Detail fields grid — only non-null values */}
+        {detailFields.length > 0 && (
+          <div className="grid grid-cols-2 gap-2">
+            {detailFields.map(({ key, label }) => (
+              <Field key={key} label={label}>
+                <span className="text-xs text-white font-medium leading-snug">{String(p[key])}</span>
+              </Field>
+            ))}
+          </div>
+        )}
+
+        {/* Array extras */}
+        {arrayFields.map(({ key, label }) => (
+          <Field key={key} label={label}>
+            <ul className="space-y-1">
+              {p[key].map((v, i) => (
+                <li key={i} className="text-xs text-[#a1a1aa] leading-snug">
+                  {typeof v === 'object' ? JSON.stringify(v) : String(v)}
+                </li>
+              ))}
+            </ul>
+          </Field>
+        ))}
+
+        {/* Raw letter */}
         <div>
-          <p className="text-[10px] font-semibold text-[#52525b] uppercase tracking-widest mb-3">
-            Raw Letter
+          <p className="text-[10px] font-semibold text-[#52525b] uppercase tracking-widest mb-2">
+            Raw letter
           </p>
-          <div
-            className="rounded-xl p-4"
-            style={{ background: '#111113', border: '1px solid rgba(255,255,255,0.05)' }}
-          >
-            <pre className="text-xs text-[#71717a] whitespace-pre-wrap font-sans leading-relaxed">
-              {parsedDenial.raw_text || denialText}
+          <div className="rounded-xl p-4" style={{ background: '#111113', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <pre className="text-xs text-[#52525b] whitespace-pre-wrap font-sans leading-relaxed">
+              {p.raw_text || denialText}
             </pre>
           </div>
         </div>
+
       </div>
     </div>
   );
@@ -435,10 +523,19 @@ export default function App() {
     }
   };
 
+  if (phase === 'impact') {
+    return <ImpactPage onBack={() => setPhase('input')} />;
+  }
+
   if (phase === 'input') {
     return (
-      <AuthGate>
-        <DenialInput denialText={denialText} onTextChange={setDenialText} onSubmit={startAnalysis} />
+      <AuthGate onShowImpact={() => setPhase('impact')}>
+        <DenialInput
+          denialText={denialText}
+          onTextChange={setDenialText}
+          onSubmit={startAnalysis}
+          onShowImpact={() => setPhase('impact')}
+        />
       </AuthGate>
     );
   }
@@ -611,6 +708,7 @@ export default function App() {
             </div>
           )}
         </div>
+        <Footer onShowImpact={() => setPhase('impact')} />
       </div>
     </AuthGate>
   );

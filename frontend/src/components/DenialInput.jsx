@@ -1,3 +1,5 @@
+import Footer from './Footer.jsx';
+
 const SAMPLE_DENIAL = `Dear Applicant,
 
 We regret to inform you that your application for a personal loan of $5,000 has been denied. This decision was based on our automated review system.
@@ -9,7 +11,7 @@ You have the right to request the specific reasons within 60 days.
 
 - AutoLend Financial`;
 
-export default function DenialInput({ denialText, onTextChange, onSubmit }) {
+export default function DenialInput({ denialText, onTextChange, onSubmit, onShowImpact }) {
   return (
     <div className="min-h-screen bg-[#0a0a0b] flex flex-col items-center justify-center p-6">
       {/* Subtle radial glow behind content */}
@@ -98,9 +100,21 @@ export default function DenialInput({ denialText, onTextChange, onSubmit }) {
           </button>
         </div>
 
-        <p className="text-center text-[#3f3f46] text-xs mt-5">
-          Powered by IBM watsonx Orchestrate — 8 AI agents
-        </p>
+        <div className="flex items-center justify-center gap-4 mt-5">
+          <p className="text-[#3f3f46] text-xs">
+            Powered by IBM watsonx Orchestrate — 8 AI agents
+          </p>
+          <span className="text-[#3f3f46] text-xs">·</span>
+          <button
+            onClick={onShowImpact}
+            className="text-xs text-indigo-500 hover:text-indigo-400 transition-colors font-medium"
+          >
+            Why this matters →
+          </button>
+        </div>
+      </div>
+      <div className="fixed bottom-0 left-0 right-0 z-10">
+        <Footer onShowImpact={onShowImpact} />
       </div>
     </div>
   );

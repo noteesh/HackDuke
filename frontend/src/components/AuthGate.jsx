@@ -209,7 +209,7 @@ function ErrorScreen({ message }) {
   );
 }
 
-function LoginScreen({ onLogin }) {
+function LoginScreen({ onLogin, onShowImpact }) {
   return (
     <div className="h-screen flex overflow-hidden" style={{ background: '#080b14' }}>
 
@@ -264,6 +264,15 @@ function LoginScreen({ onLogin }) {
             <p className="text-sm leading-relaxed" style={{ color: '#f4f4f5', fontFamily: "'JetBrains Mono', monospace" }}>
               Override the algorithm — reclaim your rights.
             </p>
+            {onShowImpact && (
+              <button
+                onClick={onShowImpact}
+                className="mt-5 text-xs text-[#52525b] hover:text-[#818cf8] transition-colors text-left"
+              >
+                85% of banks use AI to make denials. Black applicants are 80% more likely to be rejected.{' '}
+                <span className="underline underline-offset-2">See the research →</span>
+              </button>
+            )}
           </div>
 
           {/* Wireframe column — sits between text and login panel */}
@@ -369,12 +378,12 @@ function LoginScreen({ onLogin }) {
   );
 }
 
-export default function AuthGate({ children }) {
+export default function AuthGate({ children, onShowImpact }) {
   const { isLoading, error, isAuthenticated, loginWithRedirect } = useAuth0();
 
   if (isLoading) return <LoadingScreen />;
   if (error) return <ErrorScreen message={error.message} />;
-  if (!isAuthenticated) return <LoginScreen onLogin={() => loginWithRedirect()} />;
+  if (!isAuthenticated) return <LoginScreen onLogin={() => loginWithRedirect()} onShowImpact={onShowImpact} />;
 
   return children;
 }
