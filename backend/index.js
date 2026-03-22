@@ -40,10 +40,72 @@ function tryParseJSON(content) {
   }
 }
 
+// Extract a JSON string field value from raw text using regex.
+// Handles cases where JSON.parse fails due to a syntax error elsewhere in the object.
+function extractField(text, fieldName) {
+  if (!text) return null;
+  const re = new RegExp(`"${fieldName}"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"`, 's');
+  const m = text.match(re);
+  if (!m) return null;
+  return m[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+}
+
 // Convert each agent's structured JSON output into human-readable text for streaming.
 // Uses the agent's summary/prose fields first to avoid raw JSON fragments.
+// When JSON parsing failed (json === null), falls back to regex extraction of key prose fields.
 function formatAgentText(agentKey, json, rawFallback) {
-  if (!json) return rawFallback ?? '';
+  if (!json) {
+    // Try to salvage prose fields from malformed JSON via regex before giving up
+    const lines = [];
+    switch (agentKey) {
+      case 'bias': {
+        const risk = extractField(rawFallback, 'overall_discrimination_risk');
+        const summary = extractField(rawFallback, 'risk_summary');
+        const arg = extractField(rawFallback, 'strongest_argument');
+        if (risk) lines.push(`DISCRIMINATION RISK: ${risk}`);
+        if (summary) lines.push('', summary);
+        if (arg) lines.push('', 'KEY ARGUMENT:', arg);
+        break;
+      }
+      case 'precedent': {
+        const strength = extractField(rawFallback, 'overall_precedent_strength')
+          ?? extractField(rawFallback, 'overall_precedence_strength');
+        const summary = extractField(rawFallback, 'precedent_summary');
+        const strongest = extractField(rawFallback, 'strongest_precedent');
+        if (strength) lines.push(`PRECEDENT STRENGTH: ${strength}`);
+        if (summary) lines.push('', summary);
+        if (strongest) lines.push('', 'STRONGEST PRECEDENT:', strongest);
+        break;
+      }
+      case 'circumstance': {
+        const strength = extractField(rawFallback, 'overall_circumstance_strength');
+        const summary = extractField(rawFallback, 'circumstance_summary');
+        const arg = extractField(rawFallback, 'strongest_argument');
+        if (strength) lines.push(`CIRCUMSTANCE STRENGTH: ${strength}`);
+        if (summary) lines.push('', summary);
+        if (arg) lines.push('', 'KEY ARGUMENT:', arg);
+        break;
+      }
+      case 'legal': {
+        const risk = extractField(rawFallback, 'overall_legal_risk');
+        const summary = extractField(rawFallback, 'legal_summary');
+        const violation = extractField(rawFallback, 'strongest_violation');
+        if (risk) lines.push(`LEGAL RISK: ${risk}`);
+        if (summary) lines.push('', summary);
+        if (violation) lines.push('', 'KEY VIOLATION:', violation);
+        break;
+      }
+      case 'defender': {
+        const confidence = extractField(rawFallback, 'overall_defense_confidence');
+        const weakest = extractField(rawFallback, 'weakest_point');
+        if (confidence) lines.push(`DEFENSE CONFIDENCE: ${confidence}`);
+        if (weakest) lines.push('', 'WEAKEST POINT:', weakest);
+        break;
+      }
+    }
+    const result = lines.join('\n').trim();
+    return result || rawFallback || '';
+  }
 
   const lines = [];
 
@@ -72,7 +134,7 @@ function formatAgentText(agentKey, json, rawFallback) {
         lines.push('', `• ${name}`);
       }
       for (const e of (json.enforcement_actions ?? [])) {
-        const name = typeof e === 'string' ? e : (e.name ?? e.title ?? '');
+        const name = typeof e === 'string' ? e : (e.action ?? e.name ?? e.title ?? '');
         if (name) lines.push(`• Enforcement: ${name}`);
       }
       if (json.strongest_precedent) lines.push('', 'STRONGEST PRECEDENT:', json.strongest_precedent);
@@ -129,6 +191,36 @@ function formatAgentText(agentKey, json, rawFallback) {
 
   const result = lines.join('\n').trim();
   return result || rawFallback || '';
+}
+
+// Stream all 4 rebuttal texts interleaved (round-robin word by word).
+// entries: [{ agentId, text, verdict }]
+async function streamRebuttalParallel(res, entries, round) {
+  for (const e of entries) {
+    send(res, 'rebuttal_section_start', { agentId: e.agentId, round });
+  }
+
+  const streams = entries.map(({ agentId, text }) => ({
+    agentId,
+    words: text.split(/(\s+)/),
+    index: 0,
+  }));
+
+  let anyActive = true;
+  while (anyActive) {
+    anyActive = false;
+    for (const s of streams) {
+      if (s.index < s.words.length) {
+        anyActive = true;
+        send(res, 'rebuttal_chunk', { agentId: s.agentId, chunk: s.words[s.index++], round });
+      }
+    }
+    await sleep(18);
+  }
+
+  for (const e of entries) {
+    send(res, 'rebuttal_result', { agentId: e.agentId, result: e.verdict, round });
+  }
 }
 
 // Stream multiple agent texts interleaved (round-robin word by word).
@@ -268,58 +360,113 @@ app.post('/api/analyze', async (req, res) => {
     await streamAgentsParallel(res, agentEntries);
     await sleep(600);
 
-    // ── Wave 3b: Defender rebuts all attackers ───────────────────────────────
-    console.log('[analyze] Wave 3b: Defender — rebuttal');
-    send(res, 'rebuttal_start', {});
-    await sleep(400);
+    // ── Rounds 1–3: Multi-round debate ──────────────────────────────────────
+    const MAX_ROUNDS = 3;
+    const REBUTTAL_ORDER = ['bias_auditor', 'precedent_agent', 'circumstance_agent', 'legal_agent'];
+    const AGENT_ID_TO_KEY = {
+      bias_auditor:       'bias',
+      precedent_agent:    'precedent',
+      circumstance_agent: 'circumstance',
+      legal_agent:        'legal',
+    };
 
-    let defenderWave3JSON = null;
+    let currentAttackOutputs = {
+      bias_auditor:       { json: biasJSON,        raw: biasResult?.content ?? '' },
+      precedent_agent:    { json: precedentJSON,   raw: precedentResult?.content ?? '' },
+      circumstance_agent: { json: circumstanceJSON, raw: circumstanceResult?.content ?? '' },
+      legal_agent:        { json: legalJSON,       raw: legalResult?.content ?? '' },
+    };
 
-    if (AGENTS.defender) {
-      const rebuttalPrompt =
-        `You previously defended this denial:\n${JSON.stringify(defenderWave2JSON ?? defenderWave2Raw)}
+    let activeAgentIds = [...REBUTTAL_ORDER];
+    let finalConcededAgents = [];
+    let lastDefenderRebuttalJSON = null;
 
-Now rebut each of these challenges:
+    for (let round = 1; round <= MAX_ROUNDS && activeAgentIds.length > 0; round++) {
+      console.log(`[analyze] Round ${round}: active=[${activeAgentIds.join(', ')}]`);
+      send(res, 'round_start', { round, total: MAX_ROUNDS, activeAgents: [...activeAgentIds] });
+      await sleep(400);
 
-BIAS AUDITOR: ${JSON.stringify(biasJSON ?? biasResult?.content)}
-PRECEDENT AGENT: ${JSON.stringify(precedentJSON ?? precedentResult?.content)}
-CIRCUMSTANCE AGENT: ${JSON.stringify(circumstanceJSON ?? circumstanceResult?.content)}
-LEGAL AGENT: ${JSON.stringify(legalJSON ?? legalResult?.content)}`;
-
-      const { content } = await invokeAgent(AGENTS.defender, rebuttalPrompt);
-      defenderWave3JSON = tryParseJSON(content);
-
-      // Stream each rebuttal individually
-      const REBUTTAL_ORDER = [
-        'bias_auditor',
-        'precedent_agent',
-        'circumstance_agent',
-        'legal_agent',
-      ];
-
-      for (const agentId of REBUTTAL_ORDER) {
-        const rebuttal = defenderWave3JSON?.rebuttals?.[agentId];
-        if (!rebuttal) continue;
-
-        send(res, 'rebuttal_section_start', { agentId });
-
-        const rebuttalText = [
-          `${agentId.replace(/_/g, ' ').toUpperCase()} — ${rebuttal.verdict}`,
-          '',
-          rebuttal.reasoning ?? '',
-          rebuttal.citation ? `\nCitation: ${rebuttal.citation}` : '',
-        ].filter(Boolean).join('\n');
-
-        const words = rebuttalText.split(/(\s+)/);
-        for (const word of words) {
-          send(res, 'rebuttal_chunk', { agentId, chunk: word });
-          await sleep(22);
-        }
-
-        send(res, 'rebuttal_result', { agentId, result: rebuttal.verdict });
-        await sleep(300);
+      // Round 2+: active attackers counter-attack based on defender's previous rebuttal
+      if (round > 1) {
+        const counterResults = await Promise.all(
+          activeAgentIds.map(async (id) => {
+            const agentKey = AGENT_ID_TO_KEY[id];
+            const prevRebuttal = lastDefenderRebuttalJSON?.rebuttals?.[id];
+            const prevAttack = currentAttackOutputs[id];
+            const { content } = await invokeAgent(
+              AGENTS[agentKey],
+              `Round ${round} counter-attack. The institution's defender rebutted your argument with: "${prevRebuttal?.reasoning ?? 'No specific response'}". Directly refute their rebuttal and strengthen your case. Your prior argument: ${JSON.stringify(prevAttack.json ?? prevAttack.raw)}`
+            );
+            const json = tryParseJSON(content);
+            currentAttackOutputs[id] = { json, raw: content };
+            return { agentId: id, text: formatAgentText(agentKey, json, content), data: json };
+          })
+        );
+        const validCounters = counterResults.filter(e => e.text.trim());
+        if (validCounters.length > 0) await streamAgentsParallel(res, validCounters);
+        await sleep(600);
       }
+
+      // Defender rebuts this round's active attackers
+      const rebuttalContext = activeAgentIds
+        .map(id => `${id.toUpperCase()}: ${JSON.stringify(currentAttackOutputs[id]?.json ?? currentAttackOutputs[id]?.raw)}`)
+        .join('\n\n');
+
+      const rebuttalPrompt = round === 1
+        ? `You previously defended this denial:\n${JSON.stringify(defenderWave2JSON ?? defenderWave2Raw)}\n\nNow rebut each of these challenges:\n\n${rebuttalContext}`
+        : `Round ${round} defense. Rebut these counter-attacks from agents you have not yet conceded to:\n\n${rebuttalContext}\n\nYour previous round ${round - 1} responses: ${JSON.stringify(lastDefenderRebuttalJSON?.rebuttals)}`;
+
+      send(res, 'rebuttal_start', { round });
+      const { content: defContent } = await invokeAgent(AGENTS.defender, rebuttalPrompt);
+      const roundDefenderJSON = tryParseJSON(defContent);
+      lastDefenderRebuttalJSON = roundDefenderJSON;
+      console.log(`[analyze] Round ${round} defender verdicts:`,
+        roundDefenderJSON?.rebuttals
+          ? Object.entries(roundDefenderJSON.rebuttals).map(([k, v]) => `${k}=${v?.verdict}`).join(', ')
+          : 'NO REBUTTALS PARSED — raw:', defContent?.slice(0, 200)
+      );
+
+      // Stream all rebuttals in parallel (interleaved round-robin)
+      const rebuttalEntries = REBUTTAL_ORDER
+        .filter(id => activeAgentIds.includes(id))
+        .map(agentId => {
+          const rebuttal = roundDefenderJSON?.rebuttals?.[agentId];
+          if (!rebuttal) return null;
+          const text = [
+            `${agentId.replace(/_/g, ' ').toUpperCase()} — ${rebuttal.verdict}`,
+            '',
+            rebuttal.reasoning ?? '',
+            rebuttal.citation ? `\nCitation: ${rebuttal.citation}` : '',
+          ].filter(Boolean).join('\n');
+          return { agentId, text, verdict: rebuttal.verdict };
+        })
+        .filter(Boolean);
+
+      await streamRebuttalParallel(res, rebuttalEntries, round);
+
+      const roundVerdicts = Object.fromEntries(rebuttalEntries.map(e => [e.agentId, e.verdict]));
+
+      // Remove conceded agents from active list
+      for (const [agentId, verdict] of Object.entries(roundVerdicts)) {
+        if (verdict === 'CONCEDED' && !finalConcededAgents.includes(agentId)) {
+          finalConcededAgents.push(agentId);
+        }
+      }
+      activeAgentIds = activeAgentIds.filter(id => roundVerdicts[id] !== 'CONCEDED');
+
+      send(res, 'round_end', {
+        round,
+        verdicts: roundVerdicts,
+        remainingAgents: [...activeAgentIds],
+        totalConceded: finalConcededAgents.length,
+      });
+      await sleep(400);
+
+      // Stop early once override threshold is met
+      if (finalConcededAgents.length >= 2) break;
     }
+
+    const defenderWave3JSON = lastDefenderRebuttalJSON;
 
     // ── Wave 4: Override Judge ───────────────────────────────────────────────
     console.log('[analyze] Wave 4: Override Judge');
@@ -343,20 +490,11 @@ LEGAL AGENT: ${JSON.stringify(legalJSON ?? legalResult?.content)}`;
       judgeJSON = tryParseJSON(content);
     }
 
-    // Resolve concessions: prefer judge output, fall back to wave 3 rebuttals
-    let concededAgents = [];
-    let triggered = false;
-
-    if (judgeJSON) {
-      triggered = judgeJSON.override_decision === 'OVERRIDE_FIRED'
-        || judgeJSON.override_threshold_met === true;
-      concededAgents = judgeJSON.conceded_arguments ?? [];
-    } else if (defenderWave3JSON?.rebuttals) {
-      concededAgents = Object.entries(defenderWave3JSON.rebuttals)
-        .filter(([, r]) => r.verdict === 'CONCEDED')
-        .map(([k]) => k);
-      triggered = concededAgents.length >= 2;
-    }
+    // Source of truth: ONLY the defender's actual CONCEDED verdicts across all rounds.
+    // Judge is advisory/display only — never used to decide the threshold.
+    const concededAgents = finalConcededAgents;
+    const triggered = concededAgents.length >= 2;
+    console.log(`[analyze] Override: triggered=${triggered}, conceded=[${concededAgents.join(', ')}]`);
 
     send(res, 'override_result', {
       triggered,

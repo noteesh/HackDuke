@@ -242,10 +242,11 @@ function Step({ n, label, active }) {
 }
 
 // ── Arguments Panel ───────────────────────────────────────────────────────────
-function ArgumentsTab({ agents }) {
+function ArgumentsTab({ agents, currentRound }) {
   const anyActive = Object.values(agents).some(a => a.status !== 'pending');
   const defendersActive = agents.denial_defender?.status !== 'pending';
   const challengersActive = CHALLENGER_IDS.some(id => agents[id]?.status !== 'pending');
+  const inDebate = currentRound > 0 && challengersActive;
 
   return (
     <div className="h-full overflow-y-auto scrollbar-thin p-6">
@@ -265,11 +266,11 @@ function ArgumentsTab({ agents }) {
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
             <Step n="1" label="Parse" active={anyActive} />
             <span className="text-[#3f3f46] text-xs">→</span>
-            <Step n="2" label="4 agents attack in parallel" active={challengersActive} />
+            <Step n="2" label="4 agents attack" active={challengersActive} />
             <span className="text-[#3f3f46] text-xs">→</span>
             <Step n="3" label="Defender builds defense" active={defendersActive} />
             <span className="text-[#3f3f46] text-xs">→</span>
-            <Step n="4" label="Defender rebuts each" active={false} />
+            <Step n="4" label="Up to 3 debate rounds" active={inDebate} />
             <span className="text-[#3f3f46] text-xs">→</span>
             <Step n="5" label="Judge decides" active={false} />
           </div>
@@ -321,36 +322,340 @@ function ArgumentsTab({ agents }) {
 }
 
 // ── Rebuttal Panel ────────────────────────────────────────────────────────────
-function RebuttalTab({ rebuttals, overrideResult, concessionCount, phase, appealLetter, appealStreaming }) {
+const AGENT_DISPLAY_NAMES = {
+  bias_auditor:       'Bias Auditor',
+  precedent_agent:    'Precedent Agent',
+  circumstance_agent: 'Circumstance Agent',
+  legal_agent:        'Legal Agent',
+};
+
+const AGENT_COLORS = {
+  bias_auditor:       { dot: '#818cf8', bubble: 'rgba(99,102,241,0.08)',  bubbleBorder: 'rgba(99,102,241,0.18)',  label: '#6366f1' },
+  precedent_agent:    { dot: '#fb923c', bubble: 'rgba(251,146,60,0.08)',  bubbleBorder: 'rgba(251,146,60,0.18)',  label: '#f97316' },
+  circumstance_agent: { dot: '#a78bfa', bubble: 'rgba(167,139,250,0.08)', bubbleBorder: 'rgba(167,139,250,0.18)', label: '#8b5cf6' },
+  legal_agent:        { dot: '#34d399', bubble: 'rgba(52,211,153,0.08)',  bubbleBorder: 'rgba(52,211,153,0.18)',  label: '#10b981' },
+};
+
+function DebateThread({ agentId, agentRounds, rebuttalRounds }) {
+  const [expanded, setExpanded] = useState(false);
+  const name = AGENT_DISPLAY_NAMES[agentId];
+  const color = AGENT_COLORS[agentId];
+
+  const rounds = rebuttalRounds.filter(r => r.activeAgents.includes(agentId));
+  const latestRound = [...rounds].reverse().find(Boolean);
+  const finalState = latestRound?.rebuttals[agentId];
+  const finalVerdict = finalState?.result;
+  const isLive = rounds.some(r => r.rebuttals[agentId]?.status === 'arguing');
+
+  const firstAttack = agentRounds[1]?.[agentId] ?? '';
+  const snippet = firstAttack.split('\n').find(l => l.trim()) ?? '';
+
+  const borderColor = finalVerdict === 'CONCEDED'
+    ? 'rgba(244,63,94,0.22)'
+    : finalVerdict === 'REBUTTED'
+    ? 'rgba(52,211,153,0.16)'
+    : isLive ? 'rgba(99,102,241,0.2)'
+    : 'rgba(255,255,255,0.07)';
+
   return (
-    <div className="h-full overflow-y-auto scrollbar-thin p-6">
-      <div className="max-w-2xl mx-auto space-y-4">
+    <div
+      className="rounded-2xl overflow-hidden transition-all duration-200"
+      style={{ background: '#0d0d0f', border: `1px solid ${borderColor}` }}
+    >
+      {/* ── Header row (always visible) ── */}
+      <button onClick={() => setExpanded(e => !e)} className="w-full text-left">
+        <div className="flex items-center gap-3 px-4 py-3.5">
+          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: color.dot }} />
+          <span className="text-sm font-semibold text-white flex-1 min-w-0">{name}</span>
+
+          {/* Round outcome pills */}
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {rounds.map(({ round, rebuttals: rr }) => {
+              const v = rr[agentId]?.result;
+              return (
+                <span key={round} className="text-[9px] font-bold px-1.5 py-0.5 rounded"
+                  style={v === 'CONCEDED' ? { background: 'rgba(244,63,94,0.15)', color: '#fb7185' }
+                    : v === 'REBUTTED' ? { background: 'rgba(52,211,153,0.12)', color: '#34d399' }
+                    : { background: 'rgba(255,255,255,0.07)', color: '#52525b' }}>
+                  R{round}
+                </span>
+              );
+            })}
+            {rounds.length === 0 && <span className="text-[10px] text-[#3f3f46]">pending</span>}
+          </div>
+
+          {/* Final verdict */}
+          {finalVerdict ? (
+            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0"
+              style={finalVerdict === 'CONCEDED'
+                ? { background: 'rgba(244,63,94,0.12)', color: '#fb7185', border: '1px solid rgba(244,63,94,0.25)' }
+                : { background: 'rgba(52,211,153,0.10)', color: '#34d399', border: '1px solid rgba(52,211,153,0.2)' }}>
+              {finalVerdict === 'CONCEDED' ? '✗ Conceded' : '✓ Rebutted'}
+            </span>
+          ) : isLive ? (
+            <span className="flex items-center gap-1 text-[10px] text-[#818cf8] flex-shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+              Live
+            </span>
+          ) : null}
+
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="#52525b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+            className="flex-shrink-0 transition-transform duration-200"
+            style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </div>
+
+        {/* One-line snippet when collapsed */}
+        {!expanded && snippet && (
+          <div className="px-4 pb-3 -mt-1">
+            <p className="text-[11px] text-[#52525b] truncate">
+              <span className="font-medium" style={{ color: color.label }}>{name}:</span>{' '}{snippet}
+            </p>
+          </div>
+        )}
+      </button>
+
+      {/* ── Expanded: full chat thread with internal scroll ── */}
+      {expanded && (
+        <div className="border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+          <div className="overflow-y-auto px-4 py-3 space-y-5 scrollbar-thin" style={{ maxHeight: 420 }}>
+            {rounds.length === 0 ? (
+              <p className="text-[11px] text-[#3f3f46] italic">Awaiting debate…</p>
+            ) : rounds.map(({ round, rebuttals: roundRebuttals }) => {
+              const attackContent = agentRounds[round]?.[agentId];
+              const defState = roundRebuttals[agentId];
+              const verdict = defState?.result;
+              return (
+                <div key={round} className="space-y-2.5">
+                  {/* Round divider (only if multi-round) */}
+                  {rounds.length > 1 && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
+                        style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.25)' }}>
+                        {round === 1 ? 'Round 1' : `Round ${round} — counter`}
+                      </span>
+                      <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.05)' }} />
+                    </div>
+                  )}
+
+                  {/* Attacker bubble */}
+                  {attackContent && (
+                    <div className="flex">
+                      <div className="max-w-[78%] rounded-2xl rounded-tl-sm px-4 py-3"
+                        style={{ background: color.bubble, border: `1px solid ${color.bubbleBorder}` }}>
+                        <div className="text-[9px] font-bold uppercase tracking-wider mb-1.5" style={{ color: color.label }}>{name}</div>
+                        <p className="text-xs text-[#c4c4c8] leading-relaxed whitespace-pre-wrap">{attackContent}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Defender bubble */}
+                  {defState?.content ? (
+                    <div className="flex justify-end">
+                      <div className="max-w-[78%] rounded-2xl rounded-tr-sm px-4 py-3"
+                        style={{
+                          background: verdict === 'CONCEDED' ? 'rgba(244,63,94,0.07)' : verdict === 'REBUTTED' ? 'rgba(52,211,153,0.06)' : 'rgba(255,255,255,0.04)',
+                          border: verdict === 'CONCEDED' ? '1px solid rgba(244,63,94,0.2)' : verdict === 'REBUTTED' ? '1px solid rgba(52,211,153,0.16)' : '1px solid rgba(255,255,255,0.07)',
+                        }}>
+                        <div className="flex items-center justify-between mb-1.5 gap-3">
+                          <span className="text-[9px] font-bold text-[#52525b] uppercase tracking-wider">Defender</span>
+                          {verdict && (
+                            <span className="text-[9px] font-bold" style={{ color: verdict === 'CONCEDED' ? '#fb7185' : '#34d399' }}>
+                              {verdict}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs leading-relaxed whitespace-pre-wrap"
+                          style={{ color: verdict === 'CONCEDED' ? '#fda4af' : verdict === 'REBUTTED' ? '#6ee7b7' : '#a1a1aa' }}>
+                          {defState.content}
+                        </p>
+                      </div>
+                    </div>
+                  ) : defState?.status === 'arguing' ? (
+                    <div className="flex justify-end">
+                      <div className="px-4 py-2.5 rounded-2xl rounded-tr-sm text-xs text-[#818cf8] flex items-center gap-1.5"
+                        style={{ background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.15)' }}>
+                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+                        Defender responding…
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Judge Panel ───────────────────────────────────────────────────────────────
+const JUDGE_PROSE_KEYS = [
+  'overall_assessment', 'reasoning', 'analysis', 'summary',
+  'recommendation', 'key_finding', 'conclusion',
+];
+const JUDGE_LIST_KEYS = [
+  'strongest_arguments', 'key_arguments', 'winning_arguments',
+  'conceded_arguments', 'notable_points',
+];
+
+function JudgePanel({ judgeOutput }) {
+  if (!judgeOutput) return null;
+
+  // Collect prose fields
+  const proseItems = JUDGE_PROSE_KEYS
+    .filter(k => judgeOutput[k] && typeof judgeOutput[k] === 'string')
+    .map(k => ({ key: k, text: judgeOutput[k] }));
+
+  // Collect list fields (arrays of strings or objects with a text/argument field)
+  const listItems = JUDGE_LIST_KEYS
+    .filter(k => Array.isArray(judgeOutput[k]) && judgeOutput[k].length > 0)
+    .map(k => ({
+      key: k,
+      label: k.replace(/_/g, ' '),
+      items: judgeOutput[k].map(v =>
+        typeof v === 'string' ? v : (v.argument ?? v.text ?? v.reason ?? JSON.stringify(v))
+      ),
+    }));
+
+  if (proseItems.length === 0 && listItems.length === 0) return null;
+
+  return (
+    <div
+      className="rounded-2xl p-4"
+      style={{ background: '#111113', border: '1px solid rgba(255,255,255,0.07)' }}
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-3">
+        <div
+          className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{ background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.2)' }}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+          </svg>
+        </div>
+        <p className="text-xs font-semibold text-[#a1a1aa] uppercase tracking-wider">Judge's Assessment</p>
+      </div>
+
+      {/* Prose fields */}
+      {proseItems.map(({ key, text }) => (
+        <p key={key} className="text-xs text-[#71717a] leading-relaxed mb-2">{text}</p>
+      ))}
+
+      {/* List fields */}
+      {listItems.map(({ key, label, items }) => (
+        <div key={key} className="mt-2">
+          <p className="text-[10px] font-semibold text-[#52525b] uppercase tracking-wider mb-1.5 capitalize">
+            {label}
+          </p>
+          <ul className="space-y-1">
+            {items.map((item, i) => (
+              <li key={i} className="flex items-start gap-2 text-xs text-[#71717a]">
+                <span className="mt-1.5 w-1 h-1 rounded-full flex-shrink-0" style={{ background: '#fbbf24' }} />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RebuttalTab({ rebuttalRounds, rebuttals, agentRounds, overrideResult, phase }) {
+  const isDone = phase === 'complete';
+  const noOverride = isDone && overrideResult && !overrideResult.triggered;
+
+  return (
+    <div className="h-full overflow-y-auto scrollbar-thin px-6 py-5">
+      <div className="max-w-3xl mx-auto space-y-2.5">
         {CHALLENGER_IDS.map(id => (
-          <RebuttalCard key={id} agentId={id} state={rebuttals[id]} />
+          <DebateThread
+            key={id}
+            agentId={id}
+            agentRounds={agentRounds}
+            rebuttalRounds={rebuttalRounds}
+          />
         ))}
 
-        {/* Verdict */}
-        {overrideResult && (
+        {/* Judge's assessment — shown once override_result arrives */}
+        {overrideResult?.judgeOutput && (
+          <JudgePanel judgeOutput={overrideResult.judgeOutput} />
+        )}
+
+        {/* Override fired — small confirmation, appeal tab handles the letter */}
+        {overrideResult?.triggered && (
           <div
-            className="rounded-xl p-5 animate-slide-up"
-            style={
-              overrideResult.triggered
-                ? { background: 'rgba(244,63,94,0.07)', border: '1px solid rgba(244,63,94,0.25)' }
-                : { background: '#18181b', border: '1px solid rgba(255,255,255,0.07)' }
-            }
+            className="rounded-xl p-4 animate-slide-up"
+            style={{ background: 'rgba(244,63,94,0.07)', border: '1px solid rgba(244,63,94,0.25)' }}
           >
+            <div className="text-sm font-semibold text-[#fb7185] mb-1">Override Fired</div>
+            <div className="text-xs text-[#71717a]">
+              {overrideResult.concessions} of 4 challenges conceded. Defense collapsed — see the Appeal tab for your letter.
+            </div>
+          </div>
+        )}
+
+        {/* No override — prominent explanation */}
+        {noOverride && (
+          <div
+            className="rounded-2xl p-6 animate-slide-up text-center"
+            style={{ background: '#111113', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            {/* Icon */}
             <div
-              className="text-sm font-semibold mb-1"
-              style={{ color: overrideResult.triggered ? '#fb7185' : '#71717a' }}
+              className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
             >
-              {overrideResult.triggered ? 'VerdictX Fired' : 'VerdictX Not Triggered'}
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#52525b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
             </div>
-            <div className="text-xs leading-relaxed" style={{ color: '#52525b' }}>
-              {overrideResult.concessions} of 4 challenges conceded.{' '}
-              {overrideResult.triggered
-                ? 'Defense collapsed — appeal letter generated.'
-                : `Need 2 to trigger. Defense held ${4 - overrideResult.concessions}/4.`}
+
+            <p className="text-base font-semibold text-white mb-2">
+              Not enough evidence to make a case
+            </p>
+            <p className="text-sm text-[#71717a] leading-relaxed mb-5 max-w-sm mx-auto">
+              The Override requires at least 2 conceded arguments to generate a formal appeal.
+              The institution's defense held on{' '}
+              <span className="text-[#a1a1aa] font-medium">{4 - overrideResult.concessions} of 4</span> challenges
+              — not enough to override.
+            </p>
+
+            {/* What was conceded vs held */}
+            <div className="grid grid-cols-2 gap-2 text-left mb-5">
+              <div className="rounded-xl p-3" style={{ background: 'rgba(52,211,153,0.05)', border: '1px solid rgba(52,211,153,0.15)' }}>
+                <p className="text-[10px] font-semibold text-[#34d399] uppercase tracking-wider mb-2">Defense held</p>
+                {CHALLENGER_IDS.filter(id => rebuttals[id]?.result !== 'CONCEDED').map(id => (
+                  <p key={id} className="text-xs text-[#6ee7b7] mb-0.5">✓ {AGENT_DISPLAY_NAMES[id]}</p>
+                ))}
+                {CHALLENGER_IDS.filter(id => rebuttals[id]?.result !== 'CONCEDED').length === 0 && (
+                  <p className="text-xs text-[#52525b] italic">None</p>
+                )}
+              </div>
+              <div className="rounded-xl p-3" style={{ background: 'rgba(244,63,94,0.05)', border: '1px solid rgba(244,63,94,0.12)' }}>
+                <p className="text-[10px] font-semibold text-[#fb7185] uppercase tracking-wider mb-2">Conceded</p>
+                {CHALLENGER_IDS.filter(id => rebuttals[id]?.result === 'CONCEDED').map(id => (
+                  <p key={id} className="text-xs text-[#fda4af] mb-0.5">✗ {AGENT_DISPLAY_NAMES[id]}</p>
+                ))}
+                {overrideResult.concessions === 0 && (
+                  <p className="text-xs text-[#52525b] italic">None</p>
+                )}
+              </div>
             </div>
+
+            <p className="text-xs text-[#3f3f46] leading-relaxed">
+              This does not mean the denial was necessarily fair — only that the arguments found
+              were not strong enough to meet the threshold. Consider consulting a legal professional
+              or submitting a manual dispute directly with the institution.
+            </p>
           </div>
         )}
       </div>
@@ -372,6 +677,12 @@ export default function App() {
   const [appealStreaming, setAppealStreaming] = useState(false);
   const [showFlash, setShowFlash]         = useState(false);
   const [concessionCount, setConcessionCount] = useState(0);
+  const [currentRound, setCurrentRound] = useState(1);
+  // [{round, activeAgents, rebuttals:{agentId:{status,content,result}}}]
+  const [rebuttalRounds, setRebuttalRounds] = useState([]);
+  // {[round]: {[agentId]: content}} — attacker text captured per round
+  const [agentRounds, setAgentRounds] = useState({});
+  const agentContentAccumulator = useRef({});
 
   // Auto-advance tabs as pipeline progresses
   useEffect(() => {
@@ -410,6 +721,11 @@ export default function App() {
             content: (prev[data.agentId]?.content ?? '') + data.chunk,
           },
         }));
+        // Accumulate challenger content so we can show it in debate threads
+        if (CHALLENGER_IDS.includes(data.agentId)) {
+          agentContentAccumulator.current[data.agentId] =
+            (agentContentAccumulator.current[data.agentId] ?? '') + data.chunk;
+        }
         break;
 
       case 'agent_complete':
@@ -419,8 +735,54 @@ export default function App() {
         }));
         break;
 
+      case 'round_start': {
+        const { round, activeAgents } = data;
+        setCurrentRound(round);
+        // Round 1: attacker content was accumulated BEFORE this event fires — save it now
+        if (round === 1) {
+          const captured = { ...agentContentAccumulator.current };
+          setAgentRounds(prev => ({ ...prev, 1: captured }));
+          agentContentAccumulator.current = {};
+        }
+        setRebuttalRounds(prev => [...prev, {
+          round,
+          activeAgents,
+          rebuttals: Object.fromEntries(activeAgents.map(id => [id, { status: 'pending', content: '', result: null }])),
+        }]);
+        // Reset agent content for counter-attacks in rounds 2+
+        if (round > 1) {
+          agentContentAccumulator.current = {};
+          setAgents(prev => {
+            const next = { ...prev };
+            for (const id of activeAgents) {
+              next[id] = { ...next[id], status: 'pending', content: '' };
+            }
+            return next;
+          });
+        }
+        break;
+      }
+
+      case 'rebuttal_start':
+        // Round 2+: counter-attack content is fully accumulated by now — save it
+        if (data.round > 1) {
+          const captured = { ...agentContentAccumulator.current };
+          setAgentRounds(prev => ({ ...prev, [data.round]: captured }));
+          agentContentAccumulator.current = {};
+        }
+        break;
+
+      case 'round_end':
+        // informational; state already updated via rebuttal_result events
+        break;
+
       case 'rebuttal_section_start':
         setRebuttals(prev => ({ ...prev, [data.agentId]: { ...prev[data.agentId], status: 'arguing' } }));
+        setRebuttalRounds(prev => prev.map(r =>
+          r.round === data.round
+            ? { ...r, rebuttals: { ...r.rebuttals, [data.agentId]: { status: 'arguing', content: '', result: null } } }
+            : r
+        ));
         break;
 
       case 'rebuttal_chunk':
@@ -431,6 +793,11 @@ export default function App() {
             content: (prev[data.agentId]?.content ?? '') + data.chunk,
           },
         }));
+        setRebuttalRounds(prev => prev.map(r =>
+          r.round === data.round
+            ? { ...r, rebuttals: { ...r.rebuttals, [data.agentId]: { ...r.rebuttals[data.agentId], content: (r.rebuttals[data.agentId]?.content ?? '') + data.chunk } } }
+            : r
+        ));
         break;
 
       case 'rebuttal_result': {
@@ -439,6 +806,11 @@ export default function App() {
           ...prev,
           [data.agentId]: { ...prev[data.agentId], status: res === 'CONCEDED' ? 'conceded' : 'rebutted', result: res },
         }));
+        setRebuttalRounds(prev => prev.map(r =>
+          r.round === data.round
+            ? { ...r, rebuttals: { ...r.rebuttals, [data.agentId]: { ...r.rebuttals[data.agentId], status: res === 'CONCEDED' ? 'conceded' : 'rebutted', result: res } } }
+            : r
+        ));
         setAgents(prev => ({
           ...prev,
           [data.agentId]: { ...prev[data.agentId], rebuttalResult: res },
@@ -481,6 +853,10 @@ export default function App() {
     setConcessionCount(0);
     setParsedDenial(null);
     setShowFlash(false);
+    setCurrentRound(1);
+    setRebuttalRounds([]);
+    setAgentRounds({});
+    agentContentAccumulator.current = {};
     appealTabOpened.current = false;
 
     try {
@@ -580,7 +956,11 @@ export default function App() {
               <div className="flex items-center gap-1.5 text-xs text-[#818cf8]">
                 <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
                 <span className="hidden sm:block font-medium">
-                  {Object.values(rebuttals).some(r => r.status !== 'pending') ? 'Defender rebutting' : 'Agents arguing'}
+                  {Object.values(rebuttals).some(r => r.status !== 'pending')
+                    ? `Round ${currentRound} — Defender rebutting`
+                    : currentRound > 1
+                    ? `Round ${currentRound} — Counter-attack`
+                    : 'Agents arguing'}
                 </span>
               </div>
             )}
@@ -685,7 +1065,7 @@ export default function App() {
             <ExtractedTab parsedDenial={parsedDenial} denialText={denialText} />
           )}
           {activeTab === 'arguments' && (
-            <ArgumentsTab agents={agents} />
+            <ArgumentsTab agents={agents} currentRound={currentRound} />
           )}
           {activeTab === 'diagram' && (
             <div className="h-full p-4">
@@ -694,12 +1074,11 @@ export default function App() {
           )}
           {activeTab === 'rebuttal' && (
             <RebuttalTab
+              rebuttalRounds={rebuttalRounds}
               rebuttals={rebuttals}
+              agentRounds={agentRounds}
               overrideResult={overrideResult}
-              concessionCount={concessionCount}
               phase={phase}
-              appealLetter={appealLetter}
-              appealStreaming={appealStreaming}
             />
           )}
           {activeTab === 'appeal' && hasAppeal && (
