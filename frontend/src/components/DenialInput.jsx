@@ -31,11 +31,11 @@ export default function DenialInput({ denialText, onTextChange, onSubmit, onShow
             </svg>
           </div>
           <h1 className="text-3xl font-bold text-white tracking-tight mb-3">
-            The Override
+            VerdictX
           </h1>
           <p className="text-[#71717a] text-sm max-w-sm mx-auto leading-relaxed">
             Paste an algorithmic denial. Five AI agents will challenge it in parallel.
-            If the institution's defense concedes 2+ arguments, the Override fires.
+            If the institution's defense concedes 2+ arguments, VerdictX fires.
           </p>
         </div>
 
@@ -44,7 +44,7 @@ export default function DenialInput({ denialText, onTextChange, onSubmit, onShow
           {[
             { step: '01', label: 'Paste denial', sub: 'loan · insurance · housing' },
             { step: '02', label: 'Agents debate', sub: 'bias · precedent · law' },
-            { step: '03', label: 'Override fires', sub: '2+ concessions trigger' },
+            { step: '03', label: 'VerdictX fires', sub: '2+ concessions trigger' },
           ].map((item) => (
             <div
               key={item.step}
@@ -96,7 +96,7 @@ export default function DenialInput({ denialText, onTextChange, onSubmit, onShow
             onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.background = 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)'; }}
             onMouseLeave={e => { if (!e.currentTarget.disabled) e.currentTarget.style.background = 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)'; }}
           >
-            Initiate Override
+            Initiate VerdictX
           </button>
         </div>
 

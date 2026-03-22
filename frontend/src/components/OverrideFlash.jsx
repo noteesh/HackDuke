@@ -35,7 +35,7 @@ export default function OverrideFlash() {
           className="text-5xl font-bold text-white tracking-tight mb-2"
           style={{ textShadow: '0 2px 40px rgba(255,255,255,0.3)' }}
         >
-          Override
+          VerdictX
         </div>
         <div
           className="text-5xl font-bold tracking-tight mb-8"

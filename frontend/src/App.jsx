@@ -256,11 +256,11 @@ function ArgumentsTab({ agents }) {
           className="rounded-xl p-4"
           style={{ background: '#111113', border: '1px solid rgba(255,255,255,0.07)' }}
         >
-          <p className="text-xs font-semibold text-white mb-1">How The Override works</p>
+          <p className="text-xs font-semibold text-white mb-1">How VerdictX works</p>
           <p className="text-[11px] text-[#52525b] leading-relaxed mb-3">
             Your denial letter is parsed, then attacked by 4 specialist AI agents simultaneously.
             The Denial Defender (representing the institution) builds its defense, then rebuts each challenge one by one.
-            If the defense concedes 2 or more arguments, the Override fires and a formal appeal letter is generated.
+            If the defense concedes 2 or more arguments, VerdictX fires and a formal appeal letter is generated.
           </p>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
             <Step n="1" label="Parse" active={anyActive} />
@@ -343,7 +343,7 @@ function RebuttalTab({ rebuttals, overrideResult, concessionCount, phase, appeal
               className="text-sm font-semibold mb-1"
               style={{ color: overrideResult.triggered ? '#fb7185' : '#71717a' }}
             >
-              {overrideResult.triggered ? 'Override Fired' : 'Override Not Triggered'}
+              {overrideResult.triggered ? 'VerdictX Fired' : 'VerdictX Not Triggered'}
             </div>
             <div className="text-xs leading-relaxed" style={{ color: '#52525b' }}>
               {overrideResult.concessions} of 4 challenges conceded.{' '}
@@ -570,7 +570,7 @@ export default function App() {
                   <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
                 </svg>
               </div>
-              <span className="text-sm font-semibold text-white">The Override</span>
+              <span className="text-sm font-semibold text-white">VerdictX</span>
               <span className="text-[#3f3f46] text-xs hidden sm:block">/ adversarial review</span>
             </div>
           </div>
@@ -607,12 +607,12 @@ export default function App() {
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
                 </svg>
-                Override Active
+                VerdictX Active
               </div>
             )}
             {overrideResult && !overrideResult.triggered && phase === 'complete' && (
               <div className="px-3 py-1 rounded-full text-xs font-medium" style={{ background: 'rgba(255,255,255,0.05)', color: '#52525b', border: '1px solid rgba(255,255,255,0.07)' }}>
-                No override
+                No VerdictX
               </div>
             )}
 

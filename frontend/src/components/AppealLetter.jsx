@@ -76,7 +76,7 @@ export default function AppealLetter({ text, streaming }) {
 
     // Build a concise spoken summary of the appeal letter for the call
     const lines = [
-      "Hello, this is an automated message from The Override, an AI-powered legal analysis platform.",
+      "Hello, this is an automated message from VerdictX, an AI-powered legal analysis platform.",
       "We have generated a formal appeal letter on behalf of your client regarding a recent denial decision.",
       "The appeal was triggered after our AI agents identified conceded arguments that the defense could not rebut.",
       "The full appeal letter has been sent to your email. Please review it at your earliest convenience.",
