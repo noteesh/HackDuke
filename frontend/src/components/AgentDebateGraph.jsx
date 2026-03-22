@@ -259,7 +259,7 @@ export default function AgentDebateGraph({ agents }) {
           0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
           33% { transform: translate(-50%, -50%) rotate(120deg) scale(1.1); }
           66% { transform: translate(-50%, -50%) rotate(240deg) scale(0.95); }
-        }
+        } 
         @keyframes floatOrb {
           0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.4; }
           25% { transform: translateY(-20px) translateX(10px); opacity: 0.6; }
