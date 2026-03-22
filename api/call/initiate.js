@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     const call = await client.calls.create({
       to:     phone_number,
       from:   process.env.TWILIO_PHONE_NUMBER,
-      url:    `${process.env.VITE_API_URL}/api/call/webhook/start?lines=${encoded}&turn=0`,
+      url:    `${baseUrl}/api/call/webhook/start?lines=${encoded}&turn=0`,
       method: 'POST',
       machineDetection: 'DetectMessageEnd',  // waits for voicemail beep before playing
     });

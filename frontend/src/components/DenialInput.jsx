@@ -1,3 +1,4 @@
+import { useAuth0 } from '@auth0/auth0-react';
 import Footer from './Footer.jsx';
 
 // Sample A — weak case for the challenger agents. Specific metrics, full disclosures,
@@ -79,8 +80,49 @@ Automated Lending Division
 NMLS #389204`;
 
 export default function DenialInput({ denialText, onTextChange, onSubmit, onShowImpact }) {
+  const { user, logout } = useAuth0();
+
   return (
-    <div className="min-h-screen bg-[#0a0a0b] flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-[#0a0a0b] flex flex-col">
+
+      {/* ── Top bar ── */}
+      <div
+        className="flex-shrink-0 px-5 h-12 flex items-center justify-between z-10 sticky top-0"
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'rgba(10,10,11,0.97)', backdropFilter: 'blur(8px)' }}
+      >
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: 'rgba(99,102,241,0.15)' }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+          </div>
+          <span className="text-sm font-semibold text-white">VerdictX</span>
+          <span className="text-[#3f3f46] text-xs hidden sm:block">/ new case</span>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {onShowImpact && (
+            <button
+              onClick={onShowImpact}
+              className="text-xs text-[#52525b] hover:text-[#a1a1aa] transition-colors hidden sm:block"
+            >
+              Why this matters
+            </button>
+          )}
+          {user && (
+            <div className="flex items-center gap-2 pl-3" style={{ borderLeft: '1px solid rgba(255,255,255,0.07)' }}>
+              <span className="text-xs text-[#52525b]">{user.email}</span>
+              <button
+                onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+                className="text-xs text-[#3f3f46] hover:text-[#71717a] transition-colors"
+              >
+                Sign out
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Subtle radial glow behind content */}
       <div
         className="fixed inset-0 pointer-events-none"
@@ -89,7 +131,7 @@ export default function DenialInput({ denialText, onTextChange, onSubmit, onShow
         }}
       />
 
-      <div className="relative z-10 w-full max-w-xl">
+      <div className="relative z-10 w-full max-w-xl mx-auto flex-1 flex flex-col items-center justify-center p-6">
         {/* Header */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 mb-5">
